@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/utils/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Status {
+  WATCHING
+  COMPLETED
+  ON_HOLD
+  DROPPED
+  PLANNING
+}
+
+model Anime {
+  id          String    @id @default(cuid())
+  malId       Int       @map("mal_id")
+  title       String
+  imageUrl    String    @map("image_url")
+  genres      String?
+  score       Float?
+  eps_watched Int?
+  eps_total   Int?
+  year        Int?
+  createdAt   DateTime? @default(now())
+  status      Status
+
+  userId String
+  user   User?  @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id     String  @id
+  animes Anime[]
+}

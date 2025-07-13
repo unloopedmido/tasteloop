@@ -1,0 +1,23 @@
+{
+  "name": "tasteloop",
+  "module": "./src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.11.1",
+    "chalk": "^5.4.1",
+    "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
+    "discord.js": "^14.21.0",
+    "ioredis": "^5.6.1",
+    "prisma": "^6.11.1"
+  }
+}

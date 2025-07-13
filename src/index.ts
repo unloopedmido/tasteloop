@@ -1,0 +1,5 @@
+import { BotClient } from "@/structures/client";
+
+const client = new BotClient();
+
+client.init();
