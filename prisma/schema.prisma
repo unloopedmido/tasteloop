@@ -27,6 +27,7 @@ model Anime {
     malId       Int       @map("mal_id")
     title       String
     imageUrl    String    @map("image_url")
+    genres      String?
     score       Float?
     eps_watched Int?
     eps_total   Int?
@@ -38,7 +39,27 @@ model Anime {
     user   User?  @relation(fields: [userId], references: [id])
 }
 
+model Recommendation {
+    id        String   @id @default(cuid())
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String   @unique
+    data      Json
+    createdAt DateTime @default(now())
+}
+
 // Necessary for Next auth
+model User {
+    id              String          @id @default(cuid())
+    name            String?
+    email           String?         @unique
+    emailVerified   DateTime?
+    image           String?
+    animes          Anime[]
+    accounts        Account[]
+    sessions        Session[]
+    recommendations Recommendation?
+}
+
 model Account {
     id                       String  @id @default(cuid())
     userId                   String
@@ -64,17 +85,6 @@ model Session {
     userId       String
     expires      DateTime
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    animes        Anime[]
-    accounts      Account[]
-    sessions      Session[]
 }
 
 model VerificationToken {

@@ -1,38 +1,36 @@
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Home, RefreshCcw } from "lucide-react";
-import type { NextPage } from "next";
-import Link from "next/link";
+import Layout from '@/components/layout';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Home, RefreshCcw } from 'lucide-react';
+import type { NextPage } from 'next';
+import Link from 'next/link';
 
 const errors = {
   500: {
-    title: "Internal Server Error",
-    description:
-      "We encountered an internal error. Our team has been notified.",
+    title: 'Internal Server Error',
+    description: 'We encountered an internal error. Our team has been notified.'
   },
   403: {
-    title: "Access Forbidden",
-    description: "You don't have permission to access this resource.",
+    title: 'Access Forbidden',
+    description: "You don't have permission to access this resource."
   },
   400: {
-    title: "Bad Request",
-    description:
-      "The request could not be understood by the server due to malformed syntax.",
+    title: 'Bad Request',
+    description: 'The request could not be understood by the server due to malformed syntax.'
   },
   401: {
-    title: "Unauthorized",
-    description: "You must authenticate to access this resource.",
-  },
+    title: 'Unauthorized',
+    description: 'You must authenticate to access this resource.'
+  }
 };
 
 const Error: NextPage<{ statusCode?: number }> = ({ statusCode }) => {
   return (
-    <div className="flex h-[calc(100vh-100px)] flex-col items-center justify-center">
+    <Layout title={`Error ${statusCode}`} className="flex flex-col items-center justify-center">
       <h1 className="text-center text-5xl font-extrabold">
-        {errors[statusCode as keyof typeof errors]?.title || "Unknown Error"}
+        {errors[statusCode as keyof typeof errors]?.title || 'Unknown Error'}
       </h1>
       <p className="mt-4 text-center text-lg">
-        {errors[statusCode as keyof typeof errors]?.description ||
-          "An unexpected error occurred."}
+        {errors[statusCode as keyof typeof errors]?.description || 'An unexpected error occurred.'}
       </p>
       <div className="mt-8 flex justify-center gap-6">
         <Link className={buttonVariants()} href="/">
@@ -44,7 +42,7 @@ const Error: NextPage<{ statusCode?: number }> = ({ statusCode }) => {
           Try Again
         </Button>
       </div>
-    </div>
+    </Layout>
   );
 };
 

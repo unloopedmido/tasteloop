@@ -5,7 +5,7 @@ import { Star, Clock, Users, PlayCircle, Heart } from 'lucide-react';
 import { formatDate, getStatusColor } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import fetchAnimeDetails, { getCachedAnime, setCachedAnime } from '@/server/api';
+import { getCachedAnime, setCachedAnime, fetchAnimeDetails } from '@/server/anime';
 import { unstable_ViewTransition as ViewTransition } from 'react';
 import WatchlistDialog from '@/components/saveForm';
 import Metas from '@/components/animes/[id]/metas';
@@ -29,6 +29,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 export default function AnimePage({ anime }: { anime: Anime }) {
   return (
     <>
+      {/* Special metas for this page */}
       <Metas anime={anime} />
       <div className="bg-background min-h-screen">
         {/* Hero Section */}

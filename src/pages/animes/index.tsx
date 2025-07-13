@@ -1,16 +1,16 @@
 import type { GetStaticProps } from 'next';
 import type { Anime } from '@/types/anime';
+import { unstable_ViewTransition as ViewTransition } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronRight, Play } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
-import { fetchTopAnime } from '@/server/api';
+import { fetchTopAnime } from '@/server/anime';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import SaveDialog from '@/components/saveForm';
 import Link from 'next/link';
-import { unstable_ViewTransition as ViewTransition } from 'react';
-import Head from 'next/head';
+import Layout from '@/components/layout';
 
 export const getStaticProps: GetStaticProps = async () => {
   const animes = await fetchTopAnime();
@@ -31,10 +31,7 @@ export default function DiscoverPage({ animes }: { animes: Anime[] }) {
   };
 
   return (
-    <>
-      <Head>
-        <title>Top Animes | TasteLoop</title>
-      </Head>
+    <Layout>
       <section className="py-15">
         <div className="container mx-auto px-4">
           <div className="mb-8 flex flex-col space-y-2">
@@ -175,6 +172,6 @@ export default function DiscoverPage({ animes }: { animes: Anime[] }) {
           </Tabs>
         </div>
       </section>
-    </>
+    </Layout>
   );
 }

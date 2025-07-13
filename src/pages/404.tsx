@@ -1,10 +1,11 @@
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Home, RefreshCcw } from "lucide-react";
-import Link from "next/link";
+import Layout from '@/components/layout';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Home, RefreshCcw } from 'lucide-react';
+import Link from 'next/link';
 
 export default function NotFoundPage() {
   return (
-    <div className="flex h-[calc(100vh-100px)] flex-col items-center justify-center">
+    <Layout title="Error" className="flex flex-col items-center justify-center">
       <h1 className="text-center text-5xl font-extrabold">Page Not Found</h1>
       <p className="mt-4 text-center text-lg">
         The page you&apos;re looking for doesn&apos;t exist or has been moved.
@@ -19,6 +20,6 @@ export default function NotFoundPage() {
           Try Again
         </Button>
       </div>
-    </div>
+    </Layout>
   );
 }
