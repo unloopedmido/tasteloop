@@ -1,6 +1,5 @@
 import type { Button } from "@/types";
 import { fetchAnime } from "@/utils/anime";
-import { redis } from "@/utils/redis";
 import {
   ActionRowBuilder,
   ModalBuilder,
@@ -12,15 +11,8 @@ import {
 export default {
   customId: "save",
   execute: async (interaction) => {
-    const key = `pagination:${interaction.message.id}`;
-    const raw = await redis.get(key);
-    if (!raw) {
-      return interaction.editReply({
-        content: "Session expired.",
-      });
-    }
-
-    const { userId, malId } = JSON.parse(raw);
+    const malId = parseInt(interaction.customId.split("_")[1], 10);
+    const userId = interaction.customId.split("_")[2];
 
     if (interaction.user.id !== userId) {
       // Ignore users who didn't initiate the command
@@ -42,20 +34,20 @@ export default {
     const epsWatchedInput = new TextInputBuilder()
       .setCustomId("eps_watched")
       .setLabel("Episodes Watched")
-      .setPlaceholder("The amount you've watched, 0 if none.")
+      .setPlaceholder("The amount you've watched, empty if not started.")
       .setStyle(TextInputStyle.Short)
       .setMaxLength(4)
-      .setRequired(true)
+      .setRequired(false)
       .setValue("0");
 
     const scoreInput = new TextInputBuilder()
       .setCustomId("score")
       .setLabel("Score")
-      .setPlaceholder("Your score for this anime, 1-10")
+      .setPlaceholder("Your score for this anime, 1-10 or empty if not rated.")
       .setStyle(TextInputStyle.Short)
       .setMaxLength(2)
-      .setRequired(true)
-      .setValue("5");
+      .setRequired(false)
+      .setValue("0");
 
     const modal = new ModalBuilder()
       .setCustomId(`save_${anime.mal_id}`)

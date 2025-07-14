@@ -1,5 +1,4 @@
-import { BotClient } from "@/structures/client";
-
-const client = new BotClient();
+import ExtendedClient from "./structures/client";
+const client = new ExtendedClient();
 
 client.init();

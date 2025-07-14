@@ -3,7 +3,14 @@
   "module": "./src/index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun src/index.ts"
+    "dev": "NODE_ENV=development bun src/index.ts",
+    "start": "bun src/index.ts",
+    "format": "prettier --write .",
+    "lint": "eslint . --ext .ts,.tsx",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:migrate": "prisma migrate dev"
   },
   "devDependencies": {
     "@types/bun": "latest"

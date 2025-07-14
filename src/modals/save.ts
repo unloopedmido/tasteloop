@@ -1,12 +1,22 @@
 import type { Modal } from "@/types";
 import { fetchAnime } from "@/utils/anime";
 import { Status } from "@/utils/prisma";
+import { inlineCode } from "discord.js";
 
 export default {
   customId: "save",
-  execute: async (interaction, client) => {
+  execute: async (interaction, client, dbUser) => {
     await interaction.deferUpdate();
     const malId = interaction.customId.split("_")[1];
+
+    if (dbUser.animes.some((a) => a.malId === Number(malId))) {
+      await interaction.followUp({
+        content: "You already have this anime saved!",
+        flags: ["Ephemeral"],
+      });
+      return;
+    }
+
     const anime = await fetchAnime(Number(malId)).then((d) => d.data);
     const epsWatched = parseInt(
       interaction.fields.getTextInputValue("eps_watched") ?? "0"
@@ -22,15 +32,29 @@ export default {
         : Status.WATCHING;
 
     if (epsWatched > (anime.episodes ?? 1)) {
-      await interaction.editReply({
-        content: `You can't watch more than ${anime.episodes} episodes!`,
+      await interaction.followUp({
+        content: `${inlineCode(anime.title)} only has ${inlineCode(
+          String(anime.episodes) ?? "1"
+        )} episodes, you can't watch ${inlineCode(
+          String(epsWatched) ?? "1"
+        )} episodes!`,
+        flags: ["Ephemeral"],
       });
       return;
     }
 
-    if (score === 0 || score > 10) {
-      await interaction.editReply({
+    if (epsWatched === 0 && score != 0) {
+      await interaction.followUp({
+        content: "You can't give a score if you haven't watched any episodes!",
+        flags: ["Ephemeral"],
+      });
+      return;
+    }
+
+    if (score < 0 || score > 10) {
+      await interaction.followUp({
         content: "Score must be between 1 and 10!",
+        flags: ["Ephemeral"],
       });
       return;
     }
@@ -49,6 +73,11 @@ export default {
         userId: interaction.user.id,
       },
     });
+
+    (dbUser.animes as { malId: number }[]).push({
+      malId: Number(malId),
+    });
+
     await interaction.followUp({
       content: "Anime saved!",
       flags: ["Ephemeral"],

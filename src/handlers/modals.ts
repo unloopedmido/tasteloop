@@ -1,7 +1,8 @@
-import type { ExtendedClient, Modal } from "@/types";
+import type ExtendedClient from "@/structures/client";
+import type { Modal } from "@/types";
+import { log } from "@/utils/logger";
 import { readdirSync } from "fs";
 import { join } from "path";
-import { log } from "@/utils/logger";
 
 export async function loadModals(client: ExtendedClient): Promise<void> {
   const modalsPath = join(__dirname, "..", "modals");

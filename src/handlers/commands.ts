@@ -1,4 +1,4 @@
-import type { ExtendedClient } from "@/types";
+import type ExtendedClient from "@/structures/client";
 import { log } from "@/utils/logger";
 import { REST, Routes } from "discord.js";
 import { readdirSync } from "fs";

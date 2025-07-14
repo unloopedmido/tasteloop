@@ -1,6 +1,5 @@
 import type { Command } from "@/types";
 import { detailsEmbed, fetchTopAnime } from "@/utils/anime";
-import { redis } from "@/utils/redis";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -8,18 +7,23 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 
-const TTL_SECONDS = 70; // just over a minute to account for latency/delay
+const animes = await fetchTopAnime();
 
-export function createTopButtons(page: number, total: number, saved?: boolean) {
+export function createTopButtons(
+  page: number,
+  total: number,
+  malId: number,
+  dbUser: { animes?: { malId: number }[]; id: string }
+) {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
-      .setCustomId("save")
+      .setCustomId(`save_${malId}_${dbUser.id}`)
       .setLabel("Save")
       .setEmoji("🔖")
       .setStyle(ButtonStyle.Primary)
-      .setDisabled(saved === true),
+      .setDisabled(dbUser.animes?.some((anime) => anime.malId === malId)),
     new ButtonBuilder()
-      .setCustomId("prev")
+      .setCustomId(`go_${page - 1}_${total}_${dbUser.id}`)
       .setLabel("Previous")
       .setEmoji("◀️")
       .setStyle(ButtonStyle.Secondary)
@@ -30,7 +34,7 @@ export function createTopButtons(page: number, total: number, saved?: boolean) {
       .setStyle(ButtonStyle.Primary)
       .setDisabled(true),
     new ButtonBuilder()
-      .setCustomId("next")
+      .setCustomId(`go_${page + 1}_${total}_${dbUser.id}`)
       .setLabel("Next")
       .setEmoji("▶️")
       .setStyle(ButtonStyle.Secondary)
@@ -43,29 +47,16 @@ export default {
     .setName("top")
     .setDescription("Displays the top 10 currently trending animes"),
 
-  execute: async (interaction) => {
+  execute: async (interaction, _, dbUser) => {
     await interaction.deferReply();
-    const animes = await fetchTopAnime();
-    const total = animes.data.length;
-    const userId = interaction.user.id;
 
-    const message = await interaction.editReply({
-      embeds: [detailsEmbed(animes.data[0])],
-      components: [createTopButtons(0, animes.data.length)],
+    const currentAnime = animes.data[0];
+
+    await interaction.editReply({
+      embeds: [detailsEmbed(currentAnime)],
+      components: [
+        createTopButtons(0, animes.data.length, currentAnime.mal_id, dbUser),
+      ],
     });
-
-    const paginationState = {
-      userId,
-      page: 0,
-      total,
-      malId: animes.data[0].mal_id,
-    };
-
-    await redis.set(
-      `pagination:${message.id}`,
-      JSON.stringify(paginationState),
-      "EX",
-      TTL_SECONDS
-    );
   },
 } as Command;

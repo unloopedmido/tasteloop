@@ -1,4 +1,4 @@
-import type { Button, Command, ExtendedClient, Modal } from "@/types";
+import type { Button, Command, Modal } from "@/types";
 import { Client, Collection, Colors, GatewayIntentBits } from "discord.js";
 import { loadCommands, registerCommands } from "@/handlers/commands";
 import { loadEvents } from "@/handlers/events";
@@ -7,9 +7,13 @@ import { PrismaClient } from "@/utils/prisma";
 import { loadButtons } from "@/handlers/buttons";
 import { loadModals } from "@/handlers/modals";
 
-export class BotClient extends Client implements ExtendedClient {
+export default class ExtendedClient extends Client {
   public commands: Collection<string, Command>;
   public buttons: Collection<string, Button>;
+  public activeButtons: Map<
+    string,
+    { messageId: string; timeout: NodeJS.Timeout }
+  >;
   public modals: Collection<string, Modal>;
   public theme: number;
   public db: PrismaClient;
@@ -25,6 +29,7 @@ export class BotClient extends Client implements ExtendedClient {
 
     this.commands = new Collection();
     this.buttons = new Collection();
+    this.activeButtons = new Map();
     this.modals = new Collection();
     this.db = new PrismaClient();
     this.theme = Colors.Purple;
