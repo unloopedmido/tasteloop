@@ -1,7 +1,7 @@
 import type { CommandParams } from "@/types";
 import { registerCommands } from "@/handlers/commands";
 import { SlashCommandBuilder } from "discord.js";
-import BaseCommand from "@/structures/command";
+import { BaseCommand } from "@/structures/command";
 
 export default class RegisterCommand extends BaseCommand {
   public data = new SlashCommandBuilder()

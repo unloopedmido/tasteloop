@@ -175,6 +175,6 @@ dist
 .DS_Store
 
 # Prisma generated client
-/src/utils/prisma
+/src/stores/prisma
 bun.lockb
 bun.lock

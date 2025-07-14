@@ -19,7 +19,7 @@ export async function loadModals(client: ExtendedClient): Promise<void> {
       const modalInstance = new modal() as BaseModal;
 
       client.modals.set(modalInstance.customId, modalInstance);
-      log.info(`Loaded Modal: ${modalInstance.customId}`);
+      log.info(`Loaded modal: ${modalInstance.customId}`);
     }
   }
 }

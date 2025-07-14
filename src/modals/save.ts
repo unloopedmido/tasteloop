@@ -1,28 +1,45 @@
-import { BaseModal } from "@/structures/modal";
+import type { AnimeContext } from "@/types/anime";
 import type { ModalParams } from "@/types";
-import { fetchAnime } from "@/utils/anime";
-import { Status } from "@/utils/prisma";
+import { createAnimeButtons } from "@/lib/anime/buttons";
+import { fetchAnime } from "@/lib/anime/fetch";
+import { BaseModal } from "@/structures/modal";
+import { Status } from "@/stores/prisma";
 import { inlineCode } from "discord.js";
+import { fetchContext } from "@/stores/redis";
 
 export default class SaveModal extends BaseModal {
   public customId = "save";
 
   public async execute({ interaction, client, dbUser }: ModalParams) {
     await interaction.deferUpdate();
-    const malId = interaction.customId.split("_")[1];
+    const [, ctxKey] = interaction.customId.split(":");
 
-    if (dbUser.animes.some((a) => a.malId === Number(malId))) {
+    const data = await fetchContext<{
+      malId: number;
+      userId: string;
+      page: number;
+      total: number;
+      context: AnimeContext;
+    }>(ctxKey);
+    if (!data) {
       await interaction.followUp({
-        content: "You already have this anime saved!",
+        content: "Expired.",
         flags: ["Ephemeral"],
       });
       return;
     }
 
-    const anime = await fetchAnime(Number(malId)).then((d) => d.data);
-    const epsWatched = parseInt(
-      interaction.fields.getTextInputValue("eps_watched") ?? "0"
-    );
+    const anime = await fetchAnime(Number(data.malId)).then((d) => d.data);
+    let epsWatched: number | string =
+      interaction.fields.getTextInputValue("eps_watched");
+
+    if (
+      epsWatched.toLowerCase().includes("all") ||
+      epsWatched.toLowerCase().includes("complete")
+    ) {
+      epsWatched = anime.episodes ?? 0;
+    }
+
     const score = parseInt(
       interaction.fields.getTextInputValue("score") ?? "0"
     );
@@ -33,9 +50,11 @@ export default class SaveModal extends BaseModal {
         ? Status.COMPLETED
         : Status.WATCHING;
 
-    if (epsWatched > (anime.episodes ?? 1)) {
+    if (Number(epsWatched) > (anime.episodes ?? 1)) {
       await interaction.followUp({
-        content: `${inlineCode(anime.title)} only has ${inlineCode(
+        content: `${inlineCode(
+          anime.title_english ?? anime.title
+        )} only has ${inlineCode(
           String(anime.episodes) ?? "1"
         )} episodes, you can't watch ${inlineCode(
           String(epsWatched) ?? "1"
@@ -61,13 +80,24 @@ export default class SaveModal extends BaseModal {
       return;
     }
 
-    await client.db.anime.create({
-      data: {
-        imageUrl: anime.images.jpg.large_image_url,
-        malId: Number(malId),
-        eps_watched: epsWatched,
+    await client.db.anime.upsert({
+      where: {
+        malId_userId: {
+          userId: interaction.user.id,
+          malId: Number(data.malId),
+        },
+      },
+      update: {
+        eps_watched: Number(epsWatched),
         score,
-        title: anime.title,
+        status,
+      },
+      create: {
+        imageUrl: anime.images.jpg.large_image_url,
+        malId: Number(data.malId),
+        eps_watched: Number(epsWatched),
+        score,
+        title: anime.title_english ?? anime.title,
         status,
         eps_total: anime.episodes,
         genres: anime.genres.map((g) => g.name).join(", "),
@@ -77,12 +107,19 @@ export default class SaveModal extends BaseModal {
     });
 
     (dbUser.animes as { malId: number }[]).push({
-      malId: Number(malId),
+      malId: Number(data.malId),
     });
 
-    await interaction.followUp({
-      content: "Anime saved!",
-      flags: ["Ephemeral"],
+    await interaction.editReply({
+      components: [
+        await createAnimeButtons(
+          data.page,
+          data.total,
+          anime.mal_id,
+          dbUser,
+          data.context
+        ),
+      ],
     });
   }
 }

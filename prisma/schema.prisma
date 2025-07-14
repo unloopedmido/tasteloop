@@ -30,9 +30,7 @@ model Anime {
   status      Status
 
   userId String
-  user   User?  @relation(fields: [userId], references: [id])
-
-  @@unique([malId, userId]) // Ensure unique anime per user
+  user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {

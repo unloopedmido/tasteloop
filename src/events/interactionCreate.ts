@@ -1,9 +1,10 @@
-import { ComponentType, EmbedBuilder, type Interaction } from "discord.js";
+import { ComponentType, DiscordAPIError, type Interaction } from "discord.js";
 import { log } from "@/utils/logger";
 import { cancelButtonRemoval, scheduleButtonRemoval } from "@/handlers/buttons";
-import { followUpOrReply } from "@/utils/functions";
+import { followUpOrReply } from "@/utils/misc";
 import { BaseClientEvent } from "@/structures/event";
 import type ExtendedClient from "@/structures/client";
+import { baseEmbed } from "@/lib/embed";
 
 export default class InteractionCreateEvent extends BaseClientEvent<"interactionCreate"> {
   public data = {
@@ -21,20 +22,20 @@ export default class InteractionCreateEvent extends BaseClientEvent<"interaction
         await client.db.user.create({ data: { id: interaction.user.id } });
         await interaction.user.send({
           embeds: [
-            new EmbedBuilder()
-              .setTitle("🍜 Welcome to Tasteloop!")
-              .setDescription(
-                "*We are glad to have you here! Please use /help to learn more.*"
-              )
-              .setFooter({
-                text: "Made with ❤️ by Cored, Inc",
-                iconURL: "https://avatars.githubusercontent.com/u/111197202",
-              })
-              .setColor("Blurple"),
+            baseEmbed({
+              title: "Welcome to TasteLoop!",
+              description:
+                "*We are glad to have you here! Please use /help to learn more.*",
+            }),
           ],
         });
-      } catch {
-        // DMs disabled or error, ignore.
+      } catch (error) {
+        if (error instanceof DiscordAPIError && error.code === 50007) {
+          // User has DMs disabled - this is expected
+          log.info(`Cannot DM user ${interaction.user.id}: DMs disabled`);
+        } else {
+          log.error("Failed to send welcome message:", error);
+        }
       }
     }
 
@@ -91,7 +92,7 @@ export default class InteractionCreateEvent extends BaseClientEvent<"interaction
     }
 
     if (interaction.isButton()) {
-      const [baseId] = interaction.customId.split("_");
+      const [baseId] = interaction.customId.split(":");
       const handler = client.buttons.get(baseId);
       if (!handler) return;
 
@@ -137,7 +138,7 @@ export default class InteractionCreateEvent extends BaseClientEvent<"interaction
     }
 
     if (interaction.isModalSubmit()) {
-      const [baseId] = interaction.customId.split("_");
+      const [baseId] = interaction.customId.split(":");
       const handler = client.modals.get(baseId);
       if (!handler) return;
 

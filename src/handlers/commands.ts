@@ -1,5 +1,5 @@
 import type ExtendedClient from "@/structures/client";
-import BaseCommand from "@/structures/command";
+import { BaseCommand } from "@/structures/command";
 import { REST, Routes } from "discord.js";
 import { log } from "@/utils/logger";
 import { readdirSync } from "fs";
@@ -8,7 +8,7 @@ import { join } from "path";
 export async function loadCommands(client: ExtendedClient): Promise<void> {
   const commandsPath = join(__dirname, "..", "commands");
   const commandFiles = readdirSync(commandsPath).filter(
-    (file) => file.endsWith(".ts") || file.endsWith(".js")
+    (file) => file.endsWith(".ts") ?? file.endsWith(".js")
   );
 
   for (const file of commandFiles) {
@@ -21,7 +21,7 @@ export async function loadCommands(client: ExtendedClient): Promise<void> {
       const commandInstance = new command() as BaseCommand;
 
       client.commands.set(commandInstance.data.name, commandInstance);
-      log.info(`Reloaded command: ${commandInstance.data.name}`);
+      log.info(`Loaded command: ${commandInstance.data.name}`);
     }
   }
 }

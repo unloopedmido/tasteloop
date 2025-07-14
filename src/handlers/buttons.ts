@@ -29,7 +29,7 @@ export function scheduleButtonRemoval(
   messageId: string,
   channelId: string,
   customId: string,
-  timeoutMs: number = 30_000 // Default to 30 seconds
+  timeoutMs: number = 60_000 // Default to 60 seconds
 ): void {
   const existing = client.activeButtons.get(customId);
   if (existing) {

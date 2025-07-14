@@ -7,7 +7,7 @@ import {
 } from "discord.js";
 
 export function capitalize(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+  return str.charAt(0).toUpperCase() + str.toLowerCase().slice(1);
 }
 
 export function followUpOrReply(

@@ -1,31 +1,62 @@
-import { createTopButtons } from "@/commands/top";
+import type { AnimeContext } from "@/types/anime";
+import type { ButtonParams } from "@/types";
+import { createAnimeButtons } from "@/lib/anime/buttons";
+import { getDataFetcher } from "@/lib/anime/fetchers";
+import { detailsEmbed } from "@/lib/anime/embed";
 import { BaseButton } from "@/structures/button";
-import { type ButtonParams } from "@/types";
-import { detailsEmbed, fetchTopAnime } from "@/utils/anime";
+import { fetchContext } from "@/stores/redis";
 
 export default class GoButton extends BaseButton {
   public customId = "go";
 
-  public async execute({ interaction, dbUser }: ButtonParams) {
-    const page = parseInt(interaction.customId.split("_")[1], 10);
-    const total = parseInt(interaction.customId.split("_")[2], 10);
-    const userId = interaction.customId.split("_")[3];
+  public async execute({ interaction, client, dbUser }: ButtonParams) {
+    const [action, ctxKey, dir] = interaction.customId.split(":");
+    console.log("[GoButton] got customId:", interaction.customId);
+    console.log("[GoButton] looking up key:", ctxKey);
+    const data = await fetchContext<{
+      page: number;
+      total: number;
+      malId: number;
+      userId: string;
+      context: AnimeContext;
+    }>(ctxKey);
+    console.log("[GoButton] fetchContext returned:", data);
 
-    if (interaction.user.id !== userId) {
-      // Ignore users who didn't initiate the command
+    if (!data) {
       await interaction.reply({
-        content: "Only the user who ran the command can save this anime.",
+        content: "Session expired. Try again.",
+        flags: ["Ephemeral"],
+      });
+      return;
+    }
+    if (interaction.user.id !== data.userId) {
+      await interaction.reply({
+        content: "Not your session.",
         flags: ["Ephemeral"],
       });
       return;
     }
 
-    const animes = await fetchTopAnime();
-    const newAnime = animes.data[page];
+    const newPage = dir === "next" ? data.page + 1 : data.page - 1;
+
+    // fetch the new anime, embed, buttons…
+    const animes = await getDataFetcher(data.context.type).fetchData(
+      data.context,
+      client
+    );
+    const target = animes.data[newPage];
 
     await interaction.update({
-      embeds: [detailsEmbed(newAnime)],
-      components: [createTopButtons(page, total, newAnime.mal_id, dbUser)],
+      embeds: [detailsEmbed(target)],
+      components: [
+        await createAnimeButtons(
+          newPage,
+          data.total,
+          target.mal_id ?? target.malId,
+          dbUser,
+          data.context
+        ),
+      ],
     });
   }
 }
