@@ -176,3 +176,4 @@ dist
 
 # Prisma generated client
 /src/utils/prisma
+bun.lockb

@@ -1,4 +1,5 @@
-import type { Command } from "@/types";
+import BaseCommand from "@/structures/command";
+import type { CommandParams } from "@/types";
 import { detailsEmbed, fetchTopAnime } from "@/utils/anime";
 import {
   ActionRowBuilder,
@@ -42,12 +43,12 @@ export function createTopButtons(
   );
 }
 
-export default {
-  data: new SlashCommandBuilder()
+export default class TopCommand extends BaseCommand {
+  public data = new SlashCommandBuilder()
     .setName("top")
-    .setDescription("Displays the top 10 currently trending animes"),
+    .setDescription("Displays the top 10 currently trending animes");
 
-  execute: async (interaction, _, dbUser) => {
+  public async execute({ interaction, dbUser }: CommandParams) {
     await interaction.deferReply();
 
     const currentAnime = animes.data[0];
@@ -58,5 +59,5 @@ export default {
         createTopButtons(0, animes.data.length, currentAnime.mal_id, dbUser),
       ],
     });
-  },
-} as Command;
+  }
+}

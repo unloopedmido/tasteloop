@@ -1,7 +1,8 @@
+import type ExtendedClient from "@/structures/client";
+import { BaseButton } from "@/structures/button";
 import { log } from "@/utils/logger";
 import { readdirSync } from "fs";
 import { join } from "path";
-import type ExtendedClient from "@/structures/client";
 
 export async function loadButtons(client: ExtendedClient): Promise<void> {
   const buttonsPath = join(__dirname, "..", "buttons");
@@ -14,9 +15,11 @@ export async function loadButtons(client: ExtendedClient): Promise<void> {
       `${join(buttonsPath, file)}?update=${Date.now()}`
     );
 
-    if ("customId" in button && "execute" in button) {
-      client.buttons.set(button.customId, button);
-      log.info(`Loaded button: ${button.customId}`);
+    if (button && button.prototype instanceof BaseButton) {
+      const buttonInstance = new button() as BaseButton;
+
+      client.buttons.set(buttonInstance.customId, buttonInstance);
+      log.info(`Loaded button: ${buttonInstance.customId}`);
     }
   }
 }

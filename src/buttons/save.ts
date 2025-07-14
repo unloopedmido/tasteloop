@@ -1,4 +1,5 @@
-import type { Button } from "@/types";
+import { BaseButton } from "@/structures/button";
+import type { ButtonParams } from "@/types";
 import { fetchAnime } from "@/utils/anime";
 import {
   ActionRowBuilder,
@@ -8,27 +9,29 @@ import {
   type ModalActionRowComponentBuilder,
 } from "discord.js";
 
-export default {
-  customId: "save",
-  execute: async (interaction) => {
+export default class SaveButton extends BaseButton {
+  public customId = "save";
+  public async execute({ interaction }: ButtonParams) {
     const malId = parseInt(interaction.customId.split("_")[1], 10);
     const userId = interaction.customId.split("_")[2];
 
     if (interaction.user.id !== userId) {
       // Ignore users who didn't initiate the command
-      return interaction.reply({
+      await interaction.reply({
         content: "Only the user who ran the command can save this anime.",
         flags: ["Ephemeral"],
       });
+      return;
     }
 
     const response = await fetchAnime(Number(malId));
     const anime = response.data;
 
     if (!anime) {
-      return interaction.update({
+      await interaction.update({
         content: "Failed to find anime.",
       });
+      return;
     }
 
     const epsWatchedInput = new TextInputBuilder()
@@ -62,5 +65,5 @@ export default {
       );
 
     await interaction.showModal(modal);
-  },
-} as Button;
+  }
+}

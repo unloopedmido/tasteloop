@@ -1,11 +1,13 @@
-import type { Modal } from "@/types";
+import { BaseModal } from "@/structures/modal";
+import type { ModalParams } from "@/types";
 import { fetchAnime } from "@/utils/anime";
 import { Status } from "@/utils/prisma";
 import { inlineCode } from "discord.js";
 
-export default {
-  customId: "save",
-  execute: async (interaction, client, dbUser) => {
+export default class SaveModal extends BaseModal {
+  public customId = "save";
+
+  public async execute({ interaction, client, dbUser }: ModalParams) {
     await interaction.deferUpdate();
     const malId = interaction.customId.split("_")[1];
 
@@ -82,5 +84,5 @@ export default {
       content: "Anime saved!",
       flags: ["Ephemeral"],
     });
-  },
-} as Modal;
+  }
+}

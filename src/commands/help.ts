@@ -1,15 +1,17 @@
-import type { Command } from "@/types";
+import BaseCommand from "@/structures/command";
+import type { CommandParams } from "@/types";
 import {
   AttachmentBuilder,
   EmbedBuilder,
   SlashCommandBuilder,
 } from "discord.js";
 
-export default {
-  data: new SlashCommandBuilder()
+export default class HelpCommand extends BaseCommand {
+  public data = new SlashCommandBuilder()
     .setName("help")
-    .setDescription("Returns a list of all commands"),
-  execute: async (interaction, client) => {
+    .setDescription("Returns a list of all commands");
+
+  public async execute({ interaction, client }: CommandParams) {
     const commands = client.commands.filter((cmd) => !cmd.admin);
 
     const helpEmbed = new EmbedBuilder()
@@ -37,5 +39,5 @@ export default {
       embeds: [helpEmbed],
       files: [new AttachmentBuilder("./src/media/TasteLoopIcon.png")],
     });
-  },
-} as Command;
+  }
+}

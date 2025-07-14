@@ -1,19 +1,16 @@
-import type { ClientEvent } from "@/types";
-import {
-  ButtonBuilder,
-  ComponentType,
-  EmbedBuilder,
-  type Interaction,
-} from "discord.js";
+import { ComponentType, EmbedBuilder, type Interaction } from "discord.js";
 import { log } from "@/utils/logger";
 import { cancelButtonRemoval, scheduleButtonRemoval } from "@/handlers/buttons";
 import { followUpOrReply } from "@/utils/functions";
+import { BaseClientEvent } from "@/structures/event";
+import type ExtendedClient from "@/structures/client";
 
-export default {
-  data: {
-    name: "interactionCreate",
-  },
-  execute: async (client, interaction: Interaction) => {
+export default class InteractionCreateEvent extends BaseClientEvent<"interactionCreate"> {
+  public data = {
+    name: "interactionCreate" as const,
+  };
+
+  public async execute(client: ExtendedClient, interaction: Interaction) {
     const dbUser = await client.db.user.findUnique({
       where: { id: interaction.user.id },
       include: { animes: true },
@@ -60,7 +57,7 @@ export default {
           return;
         }
 
-        await command.execute(interaction, client, dbUser!);
+        await command.execute({ interaction, client, dbUser: dbUser! });
 
         if (interaction.replied || interaction.deferred) {
           const response = await interaction.fetchReply();
@@ -102,7 +99,7 @@ export default {
         // Cancel the existing timeout since the button was clicked
         cancelButtonRemoval(client, interaction.customId);
 
-        await handler.execute(interaction, client, dbUser!);
+        await handler.execute({ interaction, client, dbUser: dbUser! });
 
         // If the button handler replies with new buttons, schedule removal for those too
         if (interaction.replied || interaction.deferred) {
@@ -145,7 +142,7 @@ export default {
       if (!handler) return;
 
       try {
-        await handler.execute(interaction, client, dbUser!);
+        await handler.execute({ interaction, client, dbUser: dbUser! });
       } catch (error) {
         log.error(
           `Error executing modal handler ${interaction.customId}:`,
@@ -159,5 +156,5 @@ export default {
 
       return;
     }
-  },
-} as ClientEvent<"interactionCreate">;
+  }
+}

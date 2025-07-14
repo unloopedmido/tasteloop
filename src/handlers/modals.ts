@@ -1,5 +1,5 @@
 import type ExtendedClient from "@/structures/client";
-import type { Modal } from "@/types";
+import { BaseModal } from "@/structures/modal";
 import { log } from "@/utils/logger";
 import { readdirSync } from "fs";
 import { join } from "path";
@@ -11,12 +11,15 @@ export async function loadModals(client: ExtendedClient): Promise<void> {
   );
 
   for (const file of modalFiles) {
-    const { default: handler } = await import(
+    const { default: modal } = await import(
       `${join(modalsPath, file)}?update=${Date.now()}`
     );
-    if ("customId" in handler && "execute" in handler) {
-      client.modals.set(handler.customId, handler as Modal);
-      log.info(`Loaded modal: ${handler.customId}`);
+
+    if (modal && modal.prototype instanceof BaseModal) {
+      const modalInstance = new modal() as BaseModal;
+
+      client.modals.set(modalInstance.customId, modalInstance);
+      log.info(`Loaded Modal: ${modalInstance.customId}`);
     }
   }
 }
