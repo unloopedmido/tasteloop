@@ -1,4 +1,4 @@
-import type ExtendedClient from "@/structures/client";
+import type { ExtendedClient } from "@/structures/client";
 import { BaseCommand } from "@/structures/command";
 import { REST, Routes } from "discord.js";
 import { log } from "@/utils/logger";

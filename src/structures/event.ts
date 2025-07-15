@@ -1,5 +1,5 @@
 import type { ClientEvents } from "discord.js";
-import type ExtendedClient from "./client";
+import type { ExtendedClient } from "./client";
 
 export abstract class BaseClientEvent<
   T extends keyof ClientEvents = keyof ClientEvents

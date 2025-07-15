@@ -1,10 +1,10 @@
 import type { AnimeContext } from "@/types/anime";
 import type { ButtonParams } from "@/types";
 import { createAnimeButtons } from "@/lib/anime/buttons";
-import { getDataFetcher } from "@/lib/anime/fetchers";
 import { detailsEmbed } from "@/lib/anime/embed";
 import { BaseButton } from "@/structures/button";
 import { fetchContext } from "@/stores/redis";
+import { fetcher } from "@/lib/anime/fetch";
 
 export default class GoButton extends BaseButton {
   public customId = "go";
@@ -39,12 +39,8 @@ export default class GoButton extends BaseButton {
 
     const newPage = dir === "next" ? data.page + 1 : data.page - 1;
 
-    // fetch the new anime, embed, buttons…
-    const animes = await getDataFetcher(data.context.type).fetchData(
-      data.context,
-      client
-    );
-    const target = animes.data[newPage];
+    const animes = await fetcher(data.context);
+    const target = animes[newPage];
 
     await interaction.update({
       embeds: [detailsEmbed(target)],
@@ -52,7 +48,7 @@ export default class GoButton extends BaseButton {
         await createAnimeButtons(
           newPage,
           data.total,
-          target.mal_id ?? target.malId,
+          target.id,
           dbUser,
           data.context
         ),

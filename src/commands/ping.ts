@@ -12,11 +12,10 @@ export default class PingCommand extends BaseCommand {
   public async execute({ interaction, client, dbUser }: CommandParams) {
     const sent = await interaction.reply({
       content: "Pinging...",
-      withResponse: true,
+      fetchReply: true,
     });
 
-    const latency =
-      sent.interaction.createdTimestamp - interaction.createdTimestamp;
+    const latency = sent.createdTimestamp - interaction.createdTimestamp;
     const apiLatency = Math.round(interaction.client.ws.ping);
 
     await interaction.editReply(

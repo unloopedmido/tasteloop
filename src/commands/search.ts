@@ -1,10 +1,10 @@
 import type { CommandParams } from "@/types";
 import { createAnimeButtons } from "@/lib/anime/buttons";
-import { getDataFetcher } from "@/lib/anime/fetchers";
 import { SlashCommandBuilder } from "discord.js";
 import { detailsEmbed } from "@/lib/anime/embed";
 import { BaseCommand } from "@/structures/command";
 import { log } from "@/utils/logger";
+import { fetcher } from "@/lib/anime/fetch";
 
 export default class SearchCommand extends BaseCommand {
   public data = new SlashCommandBuilder()
@@ -15,24 +15,28 @@ export default class SearchCommand extends BaseCommand {
     );
 
   public async execute({ interaction, dbUser, client }: CommandParams) {
+    console.log(
+      `↪️  [search] before defer: replied=${interaction.replied} deferred=${interaction.deferred}`
+    );
+
     await interaction.deferReply();
     const query = interaction.options.getString("query", true);
 
     try {
       const context = { type: "search" as const, userId: dbUser.id, query };
 
-      const animes = await getDataFetcher("search").fetchData(context, client);
-      if (!animes?.data?.length) {
+      const animes = await fetcher(context);
+      if (!animes.length) {
         await interaction.editReply({ content: "No anime found." });
         return;
       }
 
-      const first = animes.data[0];
+      const first = animes[0];
 
       const row = await createAnimeButtons(
         0,
-        animes.data.length,
-        first.mal_id,
+        animes.length,
+        first.id,
         dbUser,
         context
       );

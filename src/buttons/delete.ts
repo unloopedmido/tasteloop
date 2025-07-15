@@ -1,10 +1,10 @@
 import type { ButtonParams } from "@/types";
 import { BaseButton } from "@/structures/button";
-import { getDataFetcher } from "@/lib/anime/fetchers";
 import type { AnimeContext } from "@/types/anime";
 import { detailsEmbed } from "@/lib/anime/embed";
 import { createAnimeButtons } from "@/lib/anime/buttons";
 import { fetchContext } from "@/stores/redis";
+import { fetcher } from "@/lib/anime/fetch";
 
 export default class SaveButton extends BaseButton {
   public customId = "delete";
@@ -55,11 +55,8 @@ export default class SaveButton extends BaseButton {
       return;
     }
 
-    const animes = await getDataFetcher(data.context.type).fetchData(
-      data.context,
-      client
-    );
-    const target = animes.data[data.page];
+    const animes = await fetcher(data.context);
+    const target = animes[data.page];
 
     await interaction.update({
       embeds: [detailsEmbed(target)],
@@ -67,7 +64,7 @@ export default class SaveButton extends BaseButton {
         await createAnimeButtons(
           data.page,
           data.total,
-          target.mal_id ?? target.malId,
+          target.id,
           dbUser,
           data.context
         ),

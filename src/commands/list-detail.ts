@@ -1,9 +1,9 @@
 import type { CommandParams } from "@/types";
 import { createAnimeButtons } from "@/lib/anime/buttons";
-import { getDataFetcher } from "@/lib/anime/fetchers";
 import { SlashCommandBuilder } from "discord.js";
 import { detailsEmbed } from "@/lib/anime/embed";
 import { BaseCommand } from "@/structures/command";
+import { fetcher } from "@/lib/anime/fetch";
 
 export default class ListCommand extends BaseCommand {
   public data = new SlashCommandBuilder()
@@ -19,31 +19,32 @@ export default class ListCommand extends BaseCommand {
   public async execute({ interaction, dbUser, client }: CommandParams) {
     await interaction.deferReply();
 
-    const searchQuery = interaction.options.getString("search");
+    // const searchQuery = interaction.options.getString("search");
 
     const context = {
       type: "list" as const,
       userId: dbUser.id,
     };
 
-    const searchedAnime = dbUser.animes.find((a) =>
-      a.title.toLowerCase().includes(searchQuery?.toLowerCase() ?? "")
-    );
+    // const searchedAnime = dbUser.animes.find((a) =>
+    //   a.title.toLowerCase().includes(searchQuery?.toLowerCase() ?? "")
+    // );
 
-    if (searchQuery && searchedAnime) {
-      await interaction.editReply({
-        embeds: [detailsEmbed(searchedAnime)],
-        components: [
-          await createAnimeButtons(0, 1, searchedAnime.malId, dbUser, context),
-        ],
-      });
-      return;
-    }
+    // if (searchQuery && searchedAnime) {
+    //   await interaction.editReply({
+    //     embeds: [detailsEmbed(searchedAnime)],
+    //     components: [
+    //       await createAnimeButtons(0, 1, searchedAnime.malId, dbUser, context),
+    //     ],
+    //   });
+    //   return;
+    // }
 
-    const dataFetcher = getDataFetcher(context.type);
-    const animes = await dataFetcher.fetchData(context, client);
+    const animes = await fetcher(context);
 
-    if (!animes.data.length) {
+    console.log(animes);
+
+    if (!animes.length) {
       await interaction.editReply({
         content:
           "Your anime list is empty. Use `/top` to discover and save some anime!",
@@ -51,15 +52,15 @@ export default class ListCommand extends BaseCommand {
       return;
     }
 
-    const currentAnime = animes.data[0];
+    const currentAnime = animes[0];
 
     await interaction.editReply({
       embeds: [detailsEmbed(currentAnime)],
       components: [
         await createAnimeButtons(
           0,
-          animes.data.length,
-          currentAnime.mal_id ?? currentAnime.malId,
+          animes.length,
+          currentAnime.id,
           dbUser,
           context
         ),

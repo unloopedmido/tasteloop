@@ -1,4 +1,4 @@
-import type ExtendedClient from "@/structures/client";
+import type { ExtendedClient } from "@/structures/client";
 import { BaseModal } from "@/structures/modal";
 import { log } from "@/utils/logger";
 import { readdirSync } from "fs";

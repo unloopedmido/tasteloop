@@ -1,4 +1,4 @@
-import type ExtendedClient from "@/structures/client";
+import type { ExtendedClient } from "@/structures/client";
 import { BaseClientEvent } from "@/structures/event";
 import type { ClientEvents } from "discord.js";
 import { readdirSync } from "fs";

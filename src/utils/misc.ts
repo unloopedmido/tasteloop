@@ -23,3 +23,21 @@ export function followUpOrReply(
     return interaction.reply(options);
   }
 }
+
+export function intToMonth(int?: number): string {
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  return months[(int ?? 1) - 1] || "";
+}

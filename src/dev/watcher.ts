@@ -1,4 +1,4 @@
-import type ExtendedClient from "@/structures/client";
+import type { ExtendedClient } from "@/structures/client";
 import { loadCommands } from "@/handlers/commands";
 import { loadButtons } from "@/handlers/buttons";
 import { loadModals } from "@/handlers/modals";

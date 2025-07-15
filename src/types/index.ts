@@ -1,4 +1,4 @@
-import type ExtendedClient from "@/structures/client";
+import type { ExtendedClient } from "@/structures/client";
 import type { Prisma } from "@/stores/prisma";
 import {
   ChatInputCommandInteraction,

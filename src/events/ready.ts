@@ -1,4 +1,4 @@
-import type ExtendedClient from "@/structures/client";
+import type { ExtendedClient } from "@/structures/client";
 import { BaseClientEvent } from "@/structures/event";
 import { ActivityType } from "discord.js";
 import { log } from "@/utils/logger";

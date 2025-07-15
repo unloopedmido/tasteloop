@@ -9,7 +9,7 @@ import { loadEvents } from "@/handlers/events";
 import { loadModals } from "@/handlers/modals";
 import { PrismaClient } from "@/stores/prisma";
 
-export default class ExtendedClient extends Client {
+export class ExtendedClient extends Client {
   public commands: Collection<string, BaseCommand> = new Collection();
   public buttons: Collection<string, BaseButton> = new Collection();
   public modals: Collection<string, BaseModal> = new Collection();
@@ -34,7 +34,7 @@ export default class ExtendedClient extends Client {
     await loadCommands(this);
     await loadButtons(this);
     await loadModals(this);
-    startDevWatcher(this);
+    Bun.env.NODE_ENV === "development" && startDevWatcher(this);
     Bun.env.NODE_ENV === "production" && (await registerCommands(this));
     await loadEvents(this);
     await this.login(Bun.env.DISCORD_BOT_TOKEN);

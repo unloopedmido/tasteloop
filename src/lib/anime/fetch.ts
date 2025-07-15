@@ -1,109 +1,77 @@
-import type { Anime, AnimeEpisode, AnimeRootResponse } from "@/types/anime";
-import { log } from "@/utils/logger";
+import type { Anime } from "@/types/anime.new";
+import { GraphQLClient } from "graphql-request";
+import { getGQLQuery, listQuery, topQuery } from "./queries";
+import type { AnimeContext } from "@/types/anime";
 
-let cachedData: { data: AnimeRootResponse; timestamp: number } | null = null;
+const client = new GraphQLClient("https://graphql.anilist.co");
 
-async function updateAnimeEpisodes(anime: Anime): Promise<Anime> {
-  if (anime.episodes === null) {
-    log.info(
-      `Fetching episodes for anime: ${anime.title_english || anime.title}`
-    );
-    const episodeCount = await fetchAnimeEpisodes(anime.mal_id);
-    return { ...anime, episodes: episodeCount };
-  }
-  return anime;
+export async function fetchAnime(id: number) {
+  const query = getGQLQuery("fetch");
+  const variables = { id: id };
+
+  const res = (await client.request(query, variables)) as {
+    Media: Anime;
+  };
+
+  return [res.Media];
 }
 
-async function updateAnimeListEpisodes(animeList: Anime[]): Promise<Anime[]> {
-  const updatedAnime = await Promise.all(
-    animeList.map(async (anime) => await updateAnimeEpisodes(anime))
-  );
-  return updatedAnime;
+export async function searchAnime(query: string) {
+  const searchQuery = getGQLQuery("search");
+  const variables = { query: query };
+
+  const res = (await client.request(searchQuery, variables)) as {
+    Media: Anime;
+  };
+
+  return [res.Media];
+}
+
+export async function fetchAnimeList(
+  userName: string,
+  type: "ANIME" | "MANGA"
+) {
+  const res = (await client.request(listQuery, { userName, type })) as {
+    MediaListCollection: {
+      lists: {
+        name: "Watching" | "Completed" | "Paused" | "Planning";
+        entries: { media: Anime }[];
+      }[];
+    };
+  };
+
+  const allAnimes = [] as Anime[];
+
+  for (const list of res.MediaListCollection.lists) {
+    for (const entry of list.entries) {
+      allAnimes.push(entry.media);
+    }
+  }
+
+  return allAnimes;
 }
 
 export async function fetchTopAnime() {
-  if (cachedData && Date.now() - cachedData.timestamp < 1000 * 60 * 60) {
-    const updatedData = await updateAnimeListEpisodes(cachedData.data.data);
-    return { ...cachedData.data, data: updatedData };
-  }
-
-  log.info("Fetching top anime from Jikan API");
-
-  const animeData = await fetch(
-    "https://api.jikan.moe/v4/top/anime?limit=10"
-  ).then((res) => {
-    if (!res.ok) log.error("Failed to fetch anime details");
-    return res.json() as Promise<AnimeRootResponse>;
-  });
-
-  const updatedData = await updateAnimeListEpisodes(animeData.data);
-  const finalData = { ...animeData, data: updatedData };
-
-  cachedData = {
-    data: finalData,
-    timestamp: Date.now(),
+  const res = (await client.request(topQuery)) as {
+    Page: {
+      media: Anime[];
+    };
   };
 
-  return finalData;
+  return res.Page.media;
 }
 
-export async function fetchAnime(malId: number) {
-  const response = await fetch(
-    `https://api.jikan.moe/v4/anime/${malId}/full`
-  ).then((res) => {
-    if (!res.ok) log.error("Failed to fetch anime details");
-    return res.json() as Promise<{ data: Anime }>;
-  });
-
-  // Update episodes if they're null
-  const updatedAnime = await updateAnimeEpisodes(response.data);
-
-  return { ...response, data: updatedAnime };
-}
-
-export async function searchAnime(query?: string) {
-  const response = query
-    ? await fetch(
-        `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=5`
-      ).then((res) => {
-        if (!res.ok) log.error("Failed to fetch search results");
-        return res.json() as Promise<AnimeRootResponse>;
-      })
-    : await fetchTopAnime();
-
-  if (!query) {
-    return response;
+export async function fetcher(context: AnimeContext) {
+  switch (context.type) {
+    case "search":
+      return await searchAnime(context.query!);
+    case "top":
+      return await fetchTopAnime();
+    case "list":
+      // TODO: Implement after user auth is completed
+      // return await fetchAnimeList(context.userId, "ANIME");
+      return await fetchAnimeList("nonlooped", "ANIME");
+    default:
+      throw new Error("Invalid fetch type");
   }
-
-  const updatedData = await updateAnimeListEpisodes(response.data);
-  return { ...response, data: updatedData };
-}
-
-export async function fetchAnimeEpisodes(malId: number) {
-  const data = await fetch(
-    `https://api.jikan.moe/v4/anime/${malId}/episodes`
-  ).then(
-    (res) =>
-      res.json() as Promise<{
-        data: AnimeEpisode[];
-        pagination: { last_visible_page: number };
-      }>
-  );
-
-  if (!data || !data.data || !data.pagination) {
-    log.error("Failed to fetch anime episodes");
-    return 0;
-  }
-
-  let episodes = data.data.length * (data.pagination.last_visible_page - 1);
-
-  const lastPage = await fetch(
-    `https://api.jikan.moe/v4/anime/${malId}/episodes?page=${data.pagination.last_visible_page}`
-  ).then((res) => res.json() as Promise<{ data: AnimeEpisode[] }>);
-
-  if (lastPage && lastPage.data) {
-    episodes += lastPage.data.length;
-  }
-
-  return episodes;
 }
