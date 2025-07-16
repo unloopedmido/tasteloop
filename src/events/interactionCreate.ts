@@ -27,56 +27,7 @@ export default class InteractionCreateEvent extends BaseClientEvent<"interaction
     }
 
     try {
-      const dbUser = await client.db.user.findUnique({
-        where: { id: interaction.user.id },
-        include: { animes: true },
-      });
-
-      if (!dbUser) {
-        try {
-          await client.db.user.create({ data: { id: interaction.user.id } });
-          await interaction.user.send({
-            embeds: [
-              baseEmbed({
-                title: "Welcome to TasteLoop!",
-                description:
-                  "*We are glad to have you here! Please use /help to learn more.*",
-              }),
-            ],
-          });
-        } catch (error) {
-          if (error instanceof DiscordAPIError && error.code === 50007) {
-            // User has DMs disabled - this is expected
-            log.info(`Cannot DM user ${interaction.user.id}: DMs disabled`);
-          } else {
-            log.error("Failed to send welcome message:", error);
-          }
-        }
-      }
-
       if (interaction.isChatInputCommand()) {
-        // before you use the interaction:
-        const methods: Array<keyof typeof interaction> = [
-          "reply",
-          "deferReply",
-          "followUp",
-          "editReply",
-        ];
-
-        for (const name of methods) {
-          const orig = interaction[name] as Function;
-          // @ts-expect-error dynamic assign
-          interaction[name] = function (
-            this: typeof interaction,
-            ...args: any[]
-          ) {
-            log.error(
-              `No command matching ${interaction.commandName} was found.`
-            );
-            return orig.apply(this, args);
-          };
-        }
-
         const command = client.commands.get(interaction.commandName);
         if (!command) {
           log.error(
@@ -97,7 +48,7 @@ export default class InteractionCreateEvent extends BaseClientEvent<"interaction
             return;
           }
 
-          await command.execute({ interaction, client, dbUser: dbUser! });
+          await command.execute({ interaction, client });
 
           if (interaction.replied || interaction.deferred) {
             try {
@@ -159,7 +110,7 @@ export default class InteractionCreateEvent extends BaseClientEvent<"interaction
           // Cancel the existing timeout since the button was clicked
           cancelButtonRemoval(client, interaction.customId);
 
-          await handler.execute({ interaction, client, dbUser: dbUser! });
+          await handler.execute({ interaction, client });
 
           // If the button handler replies with new buttons, schedule removal for those too
           if (interaction.replied || interaction.deferred) {
@@ -219,7 +170,7 @@ export default class InteractionCreateEvent extends BaseClientEvent<"interaction
         if (!handler) return;
 
         try {
-          await handler.execute({ interaction, client, dbUser: dbUser! });
+          await handler.execute({ interaction, client });
         } catch (error) {
           log.error(
             `Error executing modal handler ${interaction.customId}:`,

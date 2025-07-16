@@ -1,3 +1,19 @@
+export interface AnimeContext {
+  userId: string;
+  animes: Anime[] | ListAnime[];
+}
+
+export interface ListAnime {
+  progress: number;
+  score: number;
+  startedAt: {
+    month?: number;
+    year?: number;
+  };
+  status: "CURRENT" | "COMPLETED" | "PAUSED" | "DROPPED" | "PLANNING";
+  media: Anime;
+}
+
 export interface Anime {
   id: number;
   siteUrl: string;

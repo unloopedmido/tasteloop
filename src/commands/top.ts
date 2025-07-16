@@ -1,6 +1,6 @@
 import type { CommandParams } from "@/types";
 import { createAnimeButtons } from "@/lib/anime/buttons";
-import { fetchTopAnime } from "@/lib/anime/fetch";
+import { fetcher } from "@/lib/anime/fetch";
 import { SlashCommandBuilder } from "discord.js";
 import { detailsEmbed } from "@/lib/anime/embed";
 import { BaseCommand } from "@/structures/command";
@@ -10,28 +10,26 @@ export default class TopCommand extends BaseCommand {
     .setName("top")
     .setDescription("Displays the top 10 currently trending animes");
 
-  public async execute({ interaction, dbUser }: CommandParams) {
+  public async execute({ interaction }: CommandParams) {
     await interaction.deferReply();
 
+    const animes = await fetcher("top");
     const context = {
-      type: "top" as const,
-      userId: dbUser.id,
+      userId: interaction.user.id,
+      animes,
     };
-
-    const animes = await fetchTopAnime();
-    const currentAnime = animes.data[0];
+    const currentAnime = animes[0];
+    const { row } = await createAnimeButtons(
+      0,
+      animes.length,
+      context,
+      undefined,
+      "top"
+    );
 
     await interaction.editReply({
       embeds: [detailsEmbed(currentAnime)],
-      components: [
-        await createAnimeButtons(
-          0,
-          animes.data.length,
-          currentAnime.mal_id,
-          dbUser,
-          context
-        ),
-      ],
+      components: [row],
     });
   }
 }

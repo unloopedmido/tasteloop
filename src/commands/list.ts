@@ -1,8 +1,11 @@
-import { baseEmbed } from "@/lib/embed";
-import { BaseCommand } from "@/structures/command";
 import type { CommandParams } from "@/types";
 import { SlashCommandBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { Pagination } from "@acegoal07/discordjs-pagination";
+import { BaseCommand } from "@/structures/command";
+import { fetcher } from "@/lib/anime/fetch";
+import { baseEmbed } from "@/lib/embed";
+import { processListAnimes } from "@/lib/anime/process";
+import { makeProgressBar } from "@/utils/misc";
 
 export default class ListNewCommand extends BaseCommand {
   public data = new SlashCommandBuilder()
@@ -25,21 +28,11 @@ export default class ListNewCommand extends BaseCommand {
         .setMaxValue(10)
     );
 
-  public async execute({ interaction, dbUser }: CommandParams) {
+  public async execute({ interaction }: CommandParams) {
     await interaction.deferReply();
 
-    if (!dbUser.animes.length) {
-      await interaction.editReply({
-        content:
-          "Your anime list is empty. Use `/top` to discover and save some anime!",
-      });
-      return;
-    }
-
-    function makeProgressBar(current: number, total: number, length = 8) {
-      const filled = Math.round((current / total) * length);
-      return "▰".repeat(filled) + "▱".repeat(length - filled);
-    }
+    const rawAnimes = await fetcher("list");
+    const animes = processListAnimes(rawAnimes);
 
     function getStatusEmoji(watched: number, total: number) {
       if (watched === total) return "✅";
@@ -47,28 +40,26 @@ export default class ListNewCommand extends BaseCommand {
       return "📺";
     }
 
-    const fields = dbUser.animes
-      .sort(
-        (a, b) => b.eps_watched! / b.eps_total! - a.eps_watched! / a.eps_total!
-      )
+    const fields = animes
+      .sort((a, b) => b.score - a.score)
       .filter((anime) => {
         const minScore = interaction.options.getInteger("min_score");
         return minScore === null || anime.score! >= minScore;
       })
       .map((anime) => {
         const statusEmoji = getStatusEmoji(
-          anime.eps_watched ?? 0,
-          anime.eps_total ?? 0
+          anime.progress ?? 0,
+          anime.media.episodes ?? 0
         );
         const progressBar = makeProgressBar(
-          anime.eps_watched ?? 0,
-          anime.eps_total ?? 0,
+          anime.progress ?? 0,
+          anime.media.episodes ?? 0,
           8
         );
 
         return {
-          name: `${statusEmoji} ${anime.title}`,
-          value: `${progressBar} ${anime.eps_watched}/${anime.eps_total} • ${anime.score}/10`,
+          name: `${statusEmoji} ${anime.media.title.userPreferred}`,
+          value: `${progressBar} ${anime.progress}/${anime.media.episodes} • ${anime.score}/10`,
           inline: false,
         };
       });
@@ -81,8 +72,7 @@ export default class ListNewCommand extends BaseCommand {
       const pageNumber = Math.floor(i / pageSize) + 1;
       const totalPages = Math.ceil(fields.length / pageSize);
 
-      // Basic page info
-      const totalAnimes = dbUser.animes.length;
+      const totalAnimes = animes.length;
 
       const embed = baseEmbed({
         title: `Your Anime List (${totalAnimes} entries)`,

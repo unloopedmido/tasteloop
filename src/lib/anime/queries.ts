@@ -94,6 +94,13 @@ export const listQuery = gql`
           media {
             ${queryBody}
           }
+          progress
+          score
+          startedAt {
+            month
+            year
+          }
+          status
         }
       }
     }

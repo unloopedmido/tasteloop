@@ -1,40 +1,74 @@
-import type { Anime as DBAnime } from "@/stores/prisma";
-import type { Anime } from "@/types/anime.new";
-import { capitalize, intToMonth } from "@/utils/misc";
-import { formatDate } from "date-fns";
+import type { Anime, ListAnime } from "@/types/anime.new";
+import { capitalize, intToMonth, makeProgressBar } from "@/utils/misc";
 import { baseEmbed } from "../embed";
+import { processAnimes, processListAnimes } from "./process";
 
-function isApiAnime(a: any): a is Anime {
-  return typeof a.url === "string";
+function listDetailsEmbed(rawAnime: ListAnime) {
+  const anime = processListAnimes([rawAnime])[0];
+  const genres = anime.media.genres && anime.media.genres.join(", ");
+  const studios = anime.media.studios!.nodes!.map((s) => s.name).join(", ");
+  const synopsis =
+    anime.media.description!.split("\n")[0].slice(0, 150) + "...";
+  const progressBar = makeProgressBar(
+    anime.progress,
+    anime.media.episodes ?? 1,
+    8
+  );
+
+  return baseEmbed({
+    color: parseInt(
+      anime.media.coverImage.color?.replace("#", "0x") ?? "0x000000"
+    ),
+    title: anime.media.title.userPreferred,
+    url: anime.media.siteUrl,
+    thumbnail: {
+      url: anime.media.coverImage.extraLarge ?? anime.media.coverImage.large!,
+    },
+    description: `*${synopsis}*`,
+    author: {
+      name: studios || "Unknown Studio",
+    },
+    fields: [
+      { name: "⭐ Your Score", value: `**${anime.score}/10**`, inline: true },
+      {
+        name: "📺 Progress",
+        value: `${progressBar} ${anime.progress}/${anime.media.episodes} ep(s)`,
+        inline: true,
+      },
+      {
+        name: "📋 Status",
+        value: capitalize(anime.status),
+        inline: true,
+      },
+      {
+        name: "📆 Aired",
+        value: `${intToMonth(anime.media.startDate.month)} ${
+          anime.media.startDate.year
+        } ${
+          anime.media.endDate &&
+          `- ${intToMonth(anime.media.endDate.month)} ${
+            anime.media.endDate.year
+          }`
+        }`,
+      },
+      {
+        name: "🏷️ Genres",
+        value: genres || "Not specified",
+        inline: true,
+      },
+    ],
+  });
 }
 
-function getScoreColor(score = 0) {
-  if (score >= 9) return 0x00ff00;
-  if (score >= 8) return 0x00bfff;
-  if (score >= 7) return 0xffa500;
-  if (score >= 6) return 0xffff00;
-  return 0xff0000;
-}
-
-function makeProgressBar(current: number, total: number, length = 8) {
-  const filled = Math.round((current / total) * length);
-  return "▰".repeat(filled) + "▱".repeat(length - filled);
-}
-
-export function detailsEmbed(anime: Anime) {
-  // —— API branch (exactly your old logic) ——
-  const scoreColor = getScoreColor(anime.averageScore);
+function mediaDetailsEmbed(rawAnime: Anime) {
+  const anime = processAnimes([rawAnime])[0];
   const genres = anime.genres!.join(", ");
   const studios = anime.studios!.nodes!.map((s) => s.name).join(", ");
   const synopsis = anime.description!.split("\n")[0].slice(0, 200) + "...";
 
   return baseEmbed({
-    color: scoreColor,
-    title:
-      anime.title.userPreferred ??
-      anime.title.english ??
-      anime.title.romaji ??
-      anime.title.native,
+    color: parseInt(anime.coverImage.color?.replace("#", "0x") ?? "0x000000"),
+    title: anime.title.userPreferred,
     url: anime.siteUrl,
     thumbnail: {
       url: (anime.coverImage.extraLarge ?? anime.coverImage.large)!,
@@ -54,7 +88,7 @@ export function detailsEmbed(anime: Anime) {
       },
       {
         name: "👥 Popularity",
-        value: `Rank **#${anime.popularity}**`,
+        value: `**${anime.popularity?.toLocaleString("en-US")} members**`,
         inline: true,
       },
       {
@@ -67,4 +101,12 @@ export function detailsEmbed(anime: Anime) {
       { name: "🏷️ Genres", value: genres ?? "Not specified" },
     ],
   });
+}
+
+export function detailsEmbed(anime: Anime | ListAnime) {
+  if ("media" in anime) {
+    return listDetailsEmbed(anime);
+  } else {
+    return mediaDetailsEmbed(anime);
+  }
 }

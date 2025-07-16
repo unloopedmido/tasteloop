@@ -1,7 +1,7 @@
-import type { Anime } from "@/types/anime.new";
+import type { Anime, ListAnime } from "@/types/anime.new";
 import { GraphQLClient } from "graphql-request";
 import { getGQLQuery, listQuery, topQuery } from "./queries";
-import type { AnimeContext } from "@/types/anime";
+import type { AnimeContext } from "@/types/anime.new";
 
 const client = new GraphQLClient("https://graphql.anilist.co");
 
@@ -35,17 +35,15 @@ export async function fetchAnimeList(
     MediaListCollection: {
       lists: {
         name: "Watching" | "Completed" | "Paused" | "Planning";
-        entries: { media: Anime }[];
+        entries: ListAnime[];
       }[];
     };
   };
 
-  const allAnimes = [] as Anime[];
+  const allAnimes: ListAnime[] = [];
 
   for (const list of res.MediaListCollection.lists) {
-    for (const entry of list.entries) {
-      allAnimes.push(entry.media);
-    }
+    allAnimes.push(...list.entries);
   }
 
   return allAnimes;
@@ -61,10 +59,19 @@ export async function fetchTopAnime() {
   return res.Page.media;
 }
 
-export async function fetcher(context: AnimeContext) {
-  switch (context.type) {
+export async function fetcher(
+  method: "search",
+  query: string
+): Promise<Anime[]>;
+export async function fetcher(method: "list"): Promise<ListAnime[]>;
+export async function fetcher(method: "top"): Promise<Anime[]>;
+export async function fetcher(
+  method: string,
+  query?: string
+): Promise<Anime[] | ListAnime[]> {
+  switch (method) {
     case "search":
-      return await searchAnime(context.query!);
+      return await searchAnime(query!);
     case "top":
       return await fetchTopAnime();
     case "list":

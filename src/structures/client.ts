@@ -7,7 +7,11 @@ import { loadButtons } from "@/handlers/buttons";
 import { startDevWatcher } from "@/dev/watcher";
 import { loadEvents } from "@/handlers/events";
 import { loadModals } from "@/handlers/modals";
-import { PrismaClient } from "@/stores/prisma";
+// import { PrismaClient } from "@/stores/prisma";
+
+declare global {
+  var botStarted: boolean | undefined;
+}
 
 export class ExtendedClient extends Client {
   public commands: Collection<string, BaseCommand> = new Collection();
@@ -18,7 +22,7 @@ export class ExtendedClient extends Client {
     { messageId: string; timeout: NodeJS.Timeout }
   > = new Map();
   public theme: number = Colors.Purple;
-  public db: PrismaClient = new PrismaClient();
+  // public db: PrismaClient = new PrismaClient();
 
   constructor() {
     super({
@@ -31,6 +35,12 @@ export class ExtendedClient extends Client {
   }
 
   public async init(): Promise<void> {
+    if (globalThis.botStarted) {
+      throw new Error("Bot is already running!");
+    }
+
+    globalThis.botStarted = true;
+
     await loadCommands(this);
     await loadButtons(this);
     await loadModals(this);

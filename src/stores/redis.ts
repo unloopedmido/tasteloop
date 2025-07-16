@@ -1,5 +1,4 @@
 import Redis from "ioredis";
-import { randomUUID } from "crypto";
 
 export const redis = new Redis({
   host: process.env.REDIS_HOST ?? "localhost",
@@ -7,25 +6,35 @@ export const redis = new Redis({
   password: process.env.REDIS_PASSWORD ?? undefined,
 });
 
-process.on("SIGINT", async () => {
-  await redis.quit();
-});
-
-process.on("SIGTERM", async () => {
-  await redis.quit();
-});
-
 export async function storeContext<T>(
   payload: T,
-  ttlSeconds = 60
-): Promise<string> {
-  const uuid = randomUUID();
-  await redis.set(`ctx:${uuid}`, JSON.stringify(payload), "EX", ttlSeconds);
-  return uuid;
+  ttlSeconds = 60,
+  ctxKey: string
+): Promise<void> {
+  await redis.set(ctxKey, JSON.stringify(payload), "EX", ttlSeconds);
 }
 
-export async function fetchContext<T>(uuid: string): Promise<T | null> {
-  const raw = await redis.get(`ctx:${uuid}`);
-  if (!raw) return null;
-  return JSON.parse(raw) as T;
+export async function fetchContext<T>(ctxKey: string): Promise<T | null> {
+  try {
+    const raw = await redis.get(ctxKey);
+    if (!raw) {
+      return null;
+    }
+    return JSON.parse(raw) as T;
+  } catch (error) {
+    console.error(`Error fetching context for key ${ctxKey}:`, error);
+    return null;
+  }
+}
+
+export async function updateContext<T>(
+  ctxKey: string,
+  payload: T,
+  ttlSeconds = 60
+): Promise<boolean> {
+  const exists = await redis.exists(ctxKey);
+  if (!exists) return false;
+
+  await redis.set(ctxKey, JSON.stringify(payload), "EX", ttlSeconds);
+  return true;
 }

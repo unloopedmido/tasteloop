@@ -1,9 +1,9 @@
 import type { CommandParams } from "@/types";
 import { createAnimeButtons } from "@/lib/anime/buttons";
 import { SlashCommandBuilder } from "discord.js";
-import { detailsEmbed } from "@/lib/anime/embed";
 import { BaseCommand } from "@/structures/command";
 import { fetcher } from "@/lib/anime/fetch";
+import { detailsEmbed } from "@/lib/anime/embed";
 
 export default class ListCommand extends BaseCommand {
   public data = new SlashCommandBuilder()
@@ -16,55 +16,73 @@ export default class ListCommand extends BaseCommand {
         .setDescription("Search for a specific anime in your list")
     );
 
-  public async execute({ interaction, dbUser, client }: CommandParams) {
+  public async execute({ interaction }: CommandParams) {
     await interaction.deferReply();
 
-    // const searchQuery = interaction.options.getString("search");
+    try {
+      const searchQuery = interaction.options.getString("search");
 
-    const context = {
-      type: "list" as const,
-      userId: dbUser.id,
-    };
+      const animes = (await fetcher("list")).sort((a, b) => b.score - a.score);
 
-    // const searchedAnime = dbUser.animes.find((a) =>
-    //   a.title.toLowerCase().includes(searchQuery?.toLowerCase() ?? "")
-    // );
+      const context = {
+        userId: interaction.user.id,
+        animes,
+      };
 
-    // if (searchQuery && searchedAnime) {
-    //   await interaction.editReply({
-    //     embeds: [detailsEmbed(searchedAnime)],
-    //     components: [
-    //       await createAnimeButtons(0, 1, searchedAnime.malId, dbUser, context),
-    //     ],
-    //   });
-    //   return;
-    // }
+      const searchedAnimes = animes.filter((a) =>
+        a.media.title
+          .userPreferred!.toLowerCase()
+          .includes(searchQuery?.toLowerCase() ?? "")
+      );
 
-    const animes = await fetcher(context);
+      console.log(searchQuery && searchedAnimes);
 
-    console.log(animes);
+      if (searchQuery && searchedAnimes.length > 0) {
+        const { row } = await createAnimeButtons(
+          0,
+          searchedAnimes.length,
+          {
+            ...context,
+            animes: searchedAnimes,
+          },
+          undefined,
+          "list-detail"
+        );
 
-    if (!animes.length) {
+        await interaction.editReply({
+          embeds: [detailsEmbed(searchedAnimes[0])],
+          components: [row],
+        });
+        return;
+      }
+
+      if (!animes.length) {
+        await interaction.editReply({
+          content:
+            "Your anime list is empty. Use `/top` to discover and save some anime!",
+        });
+        return;
+      }
+
+      const currentAnime = animes[0];
+      const { row } = await createAnimeButtons(
+        0,
+        animes.length,
+        context,
+        undefined,
+        "list-detail"
+      );
+
+      await interaction.editReply({
+        embeds: [detailsEmbed(currentAnime)],
+        components: [row],
+      });
+    } catch (error) {
+      console.error("Error executing command list-detail:", error);
       await interaction.editReply({
         content:
-          "Your anime list is empty. Use `/top` to discover and save some anime!",
+          "An error occurred while retrieving your anime list. Please try again.",
       });
-      return;
     }
-
-    const currentAnime = animes[0];
-
-    await interaction.editReply({
-      embeds: [detailsEmbed(currentAnime)],
-      components: [
-        await createAnimeButtons(
-          0,
-          animes.length,
-          currentAnime.id,
-          dbUser,
-          context
-        ),
-      ],
-    });
   }
 }

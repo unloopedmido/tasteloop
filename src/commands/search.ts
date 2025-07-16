@@ -14,31 +14,30 @@ export default class SearchCommand extends BaseCommand {
       opt.setName("query").setDescription("Search query").setRequired(true)
     );
 
-  public async execute({ interaction, dbUser, client }: CommandParams) {
-    console.log(
-      `↪️  [search] before defer: replied=${interaction.replied} deferred=${interaction.deferred}`
-    );
-
+  public async execute({ interaction }: CommandParams) {
     await interaction.deferReply();
     const query = interaction.options.getString("query", true);
 
     try {
-      const context = { type: "search" as const, userId: dbUser.id, query };
+      const animes = await fetcher("search", query);
 
-      const animes = await fetcher(context);
       if (!animes.length) {
         await interaction.editReply({ content: "No anime found." });
         return;
       }
 
-      const first = animes[0];
+      const context = {
+        userId: interaction.user.id,
+        animes,
+      };
 
-      const row = await createAnimeButtons(
+      const first = animes[0];
+      const { row } = await createAnimeButtons(
         0,
         animes.length,
-        first.id,
-        dbUser,
-        context
+        context,
+        undefined,
+        "search"
       );
 
       await interaction.editReply({

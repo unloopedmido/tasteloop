@@ -1,5 +1,4 @@
 import type { ExtendedClient } from "@/structures/client";
-import type { Prisma } from "@/stores/prisma";
 import {
   ChatInputCommandInteraction,
   ButtonInteraction,
@@ -8,7 +7,6 @@ import {
 
 export interface BaseParams {
   client: ExtendedClient;
-  dbUser: Prisma.UserGetPayload<{ include: { animes: true } }>;
 }
 export interface ButtonParams extends BaseParams {
   interaction: ButtonInteraction;

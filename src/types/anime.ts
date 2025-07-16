@@ -1,9 +1,3 @@
-export interface AnimeContext {
-  type: "top" | "search" | "list";
-  userId: string;
-  query?: string;
-}
-
 export interface AnimeEpisode {
   mal_id: number;
   url: string;
