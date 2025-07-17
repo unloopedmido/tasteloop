@@ -19,13 +19,7 @@ export default class TopCommand extends BaseCommand {
       animes,
     };
     const currentAnime = animes[0];
-    const { row } = await createAnimeButtons(
-      0,
-      animes.length,
-      context,
-      undefined,
-      "top"
-    );
+    const { row } = await createAnimeButtons(0, animes.length, context);
 
     await interaction.editReply({
       embeds: [detailsEmbed(currentAnime)],

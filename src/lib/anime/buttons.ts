@@ -1,4 +1,4 @@
-import { redis, storeContext, updateContext } from "@/stores/redis";
+import { storeContext, updateContext } from "@/stores/redis";
 import type { AnimeContext } from "@/types/anime.new";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { randomUUID } from "crypto";
@@ -14,25 +14,16 @@ export async function createAnimeButtons(
   page: number,
   total: number,
   context: AnimeContext,
-  existingCtxKey?: string,
-  commandType?: string
+  existingCtxKey?: string
 ) {
-  // Use command-specific context key to avoid conflicts between different commands
-  const contextSuffix = commandType || "default";
-  const userCtxKey = `userctx:${context.userId}:${contextSuffix}`;
-  let ctxKey = existingCtxKey;
-
-  // If no existing context key, try to get it from user mapping
-  if (!ctxKey) {
-    ctxKey = (await redis.get(userCtxKey)) || undefined;
-  }
-
   const data: StoredAnimeData = {
     page,
     total,
     context,
     lastUpdated: Date.now(),
   };
+
+  let ctxKey = existingCtxKey;
 
   if (ctxKey) {
     // Try to update existing context
@@ -42,13 +33,11 @@ export async function createAnimeButtons(
       // Context expired, create new one
       ctxKey = randomUUID();
       await storeContext(data, 300, ctxKey);
-      await redis.set(userCtxKey, ctxKey, "EX", 300);
     }
   } else {
     // Create new context
     ctxKey = randomUUID();
     await storeContext(data, 300, ctxKey);
-    await redis.set(userCtxKey, ctxKey, "EX", 300);
   }
 
   return {

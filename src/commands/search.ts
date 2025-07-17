@@ -19,7 +19,7 @@ export default class SearchCommand extends BaseCommand {
 
     const animes = await fetcher("search", query);
 
-    if (!animes.length) {
+    if (!animes || !animes.length) {
       await interaction.editReply({ content: "No anime found." });
       return;
     }
@@ -30,13 +30,7 @@ export default class SearchCommand extends BaseCommand {
     };
 
     const first = animes[0];
-    const { row } = await createAnimeButtons(
-      0,
-      animes.length,
-      context,
-      undefined,
-      "search"
-    );
+    const { row } = await createAnimeButtons(0, animes.length, context);
 
     await interaction.editReply({
       embeds: [detailsEmbed(first)],

@@ -5,7 +5,7 @@ import { BaseCommand } from "@/structures/command";
 import { fetcher } from "@/lib/anime/fetch";
 import { detailsEmbed } from "@/lib/anime/embed";
 
-export default class ListCommand extends BaseCommand {
+export default class ListDetailCommand extends BaseCommand {
   public data = new SlashCommandBuilder()
     .setName("list-detail")
     .setDescription("Displays your saved anime list in a detailed format")
@@ -19,7 +19,7 @@ export default class ListCommand extends BaseCommand {
   public async execute({ interaction, userData }: CommandParams) {
     await interaction.deferReply();
 
-    const searchQuery = interaction.options.getString("search");
+    const searchQuery = interaction.options.getString("search") ?? "";
     const animes = (await fetcher("list", userData!.anilistId)).sort(
       (a, b) => b.score - a.score
     );
@@ -35,16 +35,10 @@ export default class ListCommand extends BaseCommand {
     );
 
     if (searchQuery && searchedAnimes.length > 0) {
-      const { row } = await createAnimeButtons(
-        0,
-        searchedAnimes.length,
-        {
-          ...context,
-          animes: searchedAnimes,
-        },
-        undefined,
-        "list-detail"
-      );
+      const { row } = await createAnimeButtons(0, searchedAnimes.length, {
+        ...context,
+        animes: searchedAnimes,
+      });
 
       await interaction.editReply({
         embeds: [detailsEmbed(searchedAnimes[0])],
@@ -62,13 +56,7 @@ export default class ListCommand extends BaseCommand {
     }
 
     const currentAnime = animes[0];
-    const { row } = await createAnimeButtons(
-      0,
-      animes.length,
-      context,
-      undefined,
-      "list-detail"
-    );
+    const { row } = await createAnimeButtons(0, animes.length, context);
 
     await interaction.editReply({
       embeds: [detailsEmbed(currentAnime)],
