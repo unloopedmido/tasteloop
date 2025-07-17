@@ -16,11 +16,13 @@ export default class ListCommand extends BaseCommand {
         .setDescription("Search for a specific anime in your list")
     );
 
-  public async execute({ interaction }: CommandParams) {
+  public async execute({ interaction, userData }: CommandParams) {
     await interaction.deferReply();
 
     const searchQuery = interaction.options.getString("search");
-    const animes = (await fetcher("list")).sort((a, b) => b.score - a.score);
+    const animes = (await fetcher("list", userData!.anilistId)).sort(
+      (a, b) => b.score - a.score
+    );
     const context = {
       userId: interaction.user.id,
       animes,

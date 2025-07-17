@@ -10,8 +10,8 @@ datasource db {
 
 model User {
   id          String    @id @map("discord_id")
-  anilistId   String?   @map("anilist_id")
-  accessToken String?   @map("access_token") @db.Text
+  anilistId   Int       @map("anilist_id")
+  accessToken String    @map("access_token") @db.Text
   expiresAt   DateTime? @map("expires_at")
 
   @@unique([id, anilistId])

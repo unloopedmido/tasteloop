@@ -28,10 +28,10 @@ export default class ListNewCommand extends BaseCommand {
         .setMaxValue(10)
     );
 
-  public async execute({ interaction }: CommandParams) {
+  public async execute({ interaction, userData }: CommandParams) {
     await interaction.deferReply();
 
-    const rawAnimes = await fetcher("list");
+    const rawAnimes = await fetcher("list", userData!.anilistId);
     const animes = processListAnimes(rawAnimes);
 
     function getStatusEmoji(watched: number, total: number) {

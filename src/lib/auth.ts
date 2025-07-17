@@ -43,6 +43,7 @@ export async function handleCallback(req: Request, res: Response) {
   }
 
   const decodedToken = decode(access_token) as JwtPayload;
+  console.log(decodedToken);
 
   await prisma.user.upsert({
     where: {
@@ -50,12 +51,13 @@ export async function handleCallback(req: Request, res: Response) {
     },
     update: {
       accessToken: access_token,
-      expiresAt: new Date((decodedToken.exp as number) * 1000),
+      expiresAt: new Date(Number(decodedToken.exp) * 1000),
     },
     create: {
       id: discordID as string,
       accessToken: access_token,
-      expiresAt: new Date((decodedToken.exp as number) * 1000),
+      anilistId: Number(decodedToken.sub),
+      expiresAt: new Date(Number(decodedToken.exp) * 1000),
     },
   });
 

@@ -89,8 +89,8 @@ export const topQuery = gql`
 `;
 
 export const listQuery = gql`
-  query ($userName: String, $type: MediaType) {
-    MediaListCollection(userName: $userName, type: $type) {
+  query ($userId: Int, $type: MediaType) {
+    MediaListCollection(userId: $userId, type: $type) {
       lists {
         name
         entries {

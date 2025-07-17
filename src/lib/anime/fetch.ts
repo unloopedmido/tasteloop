@@ -24,11 +24,8 @@ export async function searchAnime(query: string) {
   return [res.Media];
 }
 
-export async function fetchAnimeList(
-  userName: string,
-  type: "ANIME" | "MANGA"
-) {
-  const res = (await client.request(listQuery, { userName, type })) as {
+export async function fetchAnimeList(userId: number, type: "ANIME" | "MANGA") {
+  const res = (await client.request(listQuery, { userId, type })) as {
     MediaListCollection: {
       lists: {
         name: "Watching" | "Completed" | "Paused" | "Planning";
@@ -58,23 +55,24 @@ export async function fetchTopAnime() {
 
 export async function fetcher(
   method: "search",
-  query: string
+  param: string // Query
 ): Promise<Anime[]>;
-export async function fetcher(method: "list"): Promise<ListAnime[]>;
+export async function fetcher(
+  method: "list",
+  param: number // Anilist ID
+): Promise<ListAnime[]>;
 export async function fetcher(method: "top"): Promise<Anime[]>;
 export async function fetcher(
   method: string,
-  query?: string
+  param?: string | number
 ): Promise<Anime[] | ListAnime[]> {
   switch (method) {
     case "search":
-      return await searchAnime(query!);
+      return await searchAnime(param as string);
     case "top":
       return await fetchTopAnime();
     case "list":
-      // TODO: Implement after user auth is completed
-      // return await fetchAnimeList(context.userId, "ANIME");
-      return await fetchAnimeList("nonlooped", "ANIME");
+      return await fetchAnimeList(param as number, "ANIME");
     default:
       throw new Error("Invalid fetch type");
   }
