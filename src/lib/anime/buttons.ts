@@ -1,6 +1,6 @@
-import { storeContext, updateContext } from "@/stores/redis";
 import type { AnimeContext } from "@/types/anime.new";
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import { storeContext, updateContext } from "@/stores/redis";
 import { randomUUID } from "crypto";
 
 interface StoredAnimeData {
@@ -10,11 +10,36 @@ interface StoredAnimeData {
   lastUpdated: number;
 }
 
+function createButtons(
+  ctxKey: string,
+  page: number,
+  total: number,
+  saved: boolean = false
+) {
+  return new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`go:${ctxKey}:prev`)
+      .setEmoji("◀️")
+      .setStyle(ButtonStyle.Secondary)
+      .setDisabled(page === 0),
+    new ButtonBuilder()
+      .setCustomId(`edit:${ctxKey}`)
+      .setLabel(saved ? "Edit" : "Save")
+      .setEmoji(saved ? "✏️" : "💾")
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId(`go:${ctxKey}:next`)
+      .setEmoji("▶️")
+      .setStyle(ButtonStyle.Secondary)
+      .setDisabled(page === total - 1)
+  );
+}
+
 export async function createAnimeButtons(
   page: number,
   total: number,
   context: AnimeContext,
-  existingCtxKey?: string,
+  existingCtxKey?: string
 ) {
   const data: StoredAnimeData = {
     page,
@@ -36,19 +61,11 @@ export async function createAnimeButtons(
     await storeContext(data, 300, ctxKey);
   }
 
+  const currentAnime = context.animes[page];
+  const saved = currentAnime && "media" in currentAnime;
+
   return {
-    row: new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setCustomId(`go:${ctxKey}:prev`)
-        .setLabel("◀️")
-        .setStyle(ButtonStyle.Secondary)
-        .setDisabled(page === 0),
-      new ButtonBuilder()
-        .setCustomId(`go:${ctxKey}:next`)
-        .setLabel("▶️")
-        .setStyle(ButtonStyle.Secondary)
-        .setDisabled(page === total - 1),
-    ),
+    row: createButtons(ctxKey, page, total, saved),
     ctxKey,
   };
 }
@@ -57,7 +74,7 @@ export async function updateAnimeButtons(
   page: number,
   total: number,
   context: AnimeContext,
-  ctxKey: string,
+  ctxKey: string
 ) {
   const data: StoredAnimeData = {
     page,
@@ -68,16 +85,8 @@ export async function updateAnimeButtons(
 
   await updateContext(ctxKey, data, 300);
 
-  return new ActionRowBuilder<ButtonBuilder>().addComponents(
-    new ButtonBuilder()
-      .setCustomId(`go:${ctxKey}:prev`)
-      .setLabel("◀️")
-      .setStyle(ButtonStyle.Secondary)
-      .setDisabled(page === 0),
-    new ButtonBuilder()
-      .setCustomId(`go:${ctxKey}:next`)
-      .setLabel("▶️")
-      .setStyle(ButtonStyle.Secondary)
-      .setDisabled(page === total - 1),
-  );
+  const currentAnime = context.animes[page];
+  const saved = currentAnime && "media" in currentAnime;
+
+  return createButtons(ctxKey, page, total, saved);
 }

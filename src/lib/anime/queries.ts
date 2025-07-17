@@ -109,3 +109,25 @@ export const listQuery = gql`
     }
   }
 `;
+
+export const editQuery = gql`
+  mutation (
+    $animeId: Int
+    $status: MediaListStatus
+    $progress: Int
+    $score: Float
+  ) {
+    SaveMediaListEntry(
+      mediaId: $animeId
+      status: $status
+      progress: $progress
+      score: $score
+    ) {
+      id
+      status
+      progress
+      score
+      updatedAt
+    }
+  }
+`;
