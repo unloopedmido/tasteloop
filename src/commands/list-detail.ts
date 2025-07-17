@@ -19,70 +19,58 @@ export default class ListCommand extends BaseCommand {
   public async execute({ interaction }: CommandParams) {
     await interaction.deferReply();
 
-    try {
-      const searchQuery = interaction.options.getString("search");
+    const searchQuery = interaction.options.getString("search");
+    const animes = (await fetcher("list")).sort((a, b) => b.score - a.score);
+    const context = {
+      userId: interaction.user.id,
+      animes,
+    };
 
-      const animes = (await fetcher("list")).sort((a, b) => b.score - a.score);
+    const searchedAnimes = animes.filter((a) =>
+      a.media.title
+        .userPreferred!.toLowerCase()
+        .includes(searchQuery?.toLowerCase() ?? "")
+    );
 
-      const context = {
-        userId: interaction.user.id,
-        animes,
-      };
-
-      const searchedAnimes = animes.filter((a) =>
-        a.media.title
-          .userPreferred!.toLowerCase()
-          .includes(searchQuery?.toLowerCase() ?? "")
-      );
-
-      console.log(searchQuery && searchedAnimes);
-
-      if (searchQuery && searchedAnimes.length > 0) {
-        const { row } = await createAnimeButtons(
-          0,
-          searchedAnimes.length,
-          {
-            ...context,
-            animes: searchedAnimes,
-          },
-          undefined,
-          "list-detail"
-        );
-
-        await interaction.editReply({
-          embeds: [detailsEmbed(searchedAnimes[0])],
-          components: [row],
-        });
-        return;
-      }
-
-      if (!animes.length) {
-        await interaction.editReply({
-          content:
-            "Your anime list is empty. Use `/top` to discover and save some anime!",
-        });
-        return;
-      }
-
-      const currentAnime = animes[0];
+    if (searchQuery && searchedAnimes.length > 0) {
       const { row } = await createAnimeButtons(
         0,
-        animes.length,
-        context,
+        searchedAnimes.length,
+        {
+          ...context,
+          animes: searchedAnimes,
+        },
         undefined,
         "list-detail"
       );
 
       await interaction.editReply({
-        embeds: [detailsEmbed(currentAnime)],
+        embeds: [detailsEmbed(searchedAnimes[0])],
         components: [row],
       });
-    } catch (error) {
-      console.error("Error executing command list-detail:", error);
+      return;
+    }
+
+    if (!animes.length) {
       await interaction.editReply({
         content:
-          "An error occurred while retrieving your anime list. Please try again.",
+          "Your anime list is empty. Use `/top` to discover and save some anime!",
       });
+      return;
     }
+
+    const currentAnime = animes[0];
+    const { row } = await createAnimeButtons(
+      0,
+      animes.length,
+      context,
+      undefined,
+      "list-detail"
+    );
+
+    await interaction.editReply({
+      embeds: [detailsEmbed(currentAnime)],
+      components: [row],
+    });
   }
 }
