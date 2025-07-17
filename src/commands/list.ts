@@ -33,18 +33,21 @@ export default class ListNewCommand extends BaseCommand {
 
     const rawAnimes = await fetcher("list", userData!.anilistId);
     const animes = processListAnimes(rawAnimes);
+    const minScore = interaction.options.getInteger("min_score");
+    const maxScore = interaction.options.getInteger("max_score");
 
-    function getStatusEmoji(watched: number, total: number) {
+    const getStatusEmoji = (watched: number, total: number) => {
       if (watched === total) return "✅";
       if (watched === 0) return "📋";
       return "📺";
-    }
+    };
 
     const fields = animes
       .sort((a, b) => b.score - a.score)
       .filter((anime) => {
-        const minScore = interaction.options.getInteger("min_score");
-        return minScore === null || anime.score! >= minScore;
+        if (minScore !== null && anime.score! < minScore) return false;
+        if (maxScore !== null && anime.score! > maxScore) return false;
+        return true;
       })
       .map((anime) => {
         const statusEmoji = getStatusEmoji(

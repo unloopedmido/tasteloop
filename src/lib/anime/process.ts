@@ -1,7 +1,7 @@
 import type { Anime, ListAnime } from "@/types/anime.new";
 
 export function processAnimes(animes: Anime[]) {
-  animes.map((anime) => {
+  return animes.map((anime) => {
     if (anime.episodes === null) {
       anime.episodes = anime.nextAiringEpisode?.episode ?? 1;
     }
@@ -24,18 +24,13 @@ export function processAnimes(animes: Anime[]) {
 
     return anime;
   });
-
-  return animes;
 }
 
 export function processListAnimes(animes: ListAnime[]) {
-  const medias: Anime[] = animes.map((a) => a.media);
-  const newMedias = processAnimes(medias);
+  const processedMedias = processAnimes(animes.map((a) => a.media));
 
   return animes.map((a, i) => ({
     ...a,
-    media: {
-      ...newMedias[i],
-    },
+    media: processedMedias[i],
   }));
 }

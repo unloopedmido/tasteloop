@@ -4,23 +4,11 @@ import { fetchQuery, listQuery, searchQuery, topQuery } from "./queries";
 
 const client = new GraphQLClient("https://graphql.anilist.co");
 
-export async function fetchAnime(id: number) {
-  const variables = { id: id };
-
-  const res = (await client.request(fetchQuery, variables)) as {
-    Media: Anime;
-  };
-
-  return [res.Media];
-}
-
 export async function searchAnime(query: string) {
-  const variables = { query: query };
-
+  const variables = { query };
   const res = (await client.request(searchQuery, variables)) as {
     Media: Anime;
   };
-
   return [res.Media];
 }
 
@@ -28,19 +16,12 @@ export async function fetchAnimeList(userId: number, type: "ANIME" | "MANGA") {
   const res = (await client.request(listQuery, { userId, type })) as {
     MediaListCollection: {
       lists: {
-        name: "Watching" | "Completed" | "Paused" | "Planning";
         entries: ListAnime[];
       }[];
     };
   };
 
-  const allAnimes: ListAnime[] = [];
-
-  for (const list of res.MediaListCollection.lists) {
-    allAnimes.push(...list.entries);
-  }
-
-  return allAnimes;
+  return res.MediaListCollection.lists.flatMap(list => list.entries);
 }
 
 export async function fetchTopAnime() {
@@ -49,17 +30,16 @@ export async function fetchTopAnime() {
       media: Anime[];
     };
   };
-
   return res.Page.media;
 }
 
 export async function fetcher(
   method: "search",
-  param: string // Query
+  param: string
 ): Promise<Anime[]>;
 export async function fetcher(
   method: "list",
-  param: number // Anilist ID
+  param: number
 ): Promise<ListAnime[]>;
 export async function fetcher(method: "top"): Promise<Anime[]>;
 export async function fetcher(
@@ -68,11 +48,11 @@ export async function fetcher(
 ): Promise<Anime[] | ListAnime[]> {
   switch (method) {
     case "search":
-      return await searchAnime(param as string);
+      return searchAnime(param as string);
     case "top":
-      return await fetchTopAnime();
+      return fetchTopAnime();
     case "list":
-      return await fetchAnimeList(param as number, "ANIME");
+      return fetchAnimeList(param as number, "ANIME");
     default:
       throw new Error("Invalid fetch type");
   }

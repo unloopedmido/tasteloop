@@ -5,10 +5,9 @@ import { processAnimes, processListAnimes } from "./process";
 
 function listDetailsEmbed(rawAnime: ListAnime) {
   const anime = processListAnimes([rawAnime])[0];
-  const genres = anime.media.genres && anime.media.genres.join(", ");
+  const genres = anime.media.genres?.join(", ");
   const studios = anime.media.studios!.nodes!.map((s) => s.name).join(", ");
-  const synopsis =
-    anime.media.description!.split("\n")[0].slice(0, 150) + "...";
+  const synopsis = anime.media.description!.split("\n")[0].slice(0, 150) + "...";
   const progressBar = makeProgressBar(
     anime.progress,
     anime.media.episodes ?? 1,
@@ -44,11 +43,12 @@ function listDetailsEmbed(rawAnime: ListAnime) {
         name: "📆 Aired",
         value: `${intToMonth(anime.media.startDate.month)} ${
           anime.media.startDate.year
-        } ${
-          anime.media.endDate &&
-          `- ${intToMonth(anime.media.endDate.month)} ${
-            anime.media.endDate.year
-          }`
+        }${
+          anime.media.endDate
+            ? ` - ${intToMonth(anime.media.endDate.month)} ${
+                anime.media.endDate.year
+              }`
+            : ""
         }`,
       },
       {
@@ -93,9 +93,10 @@ function mediaDetailsEmbed(rawAnime: Anime) {
       },
       {
         name: "📆 Aired",
-        value: `${intToMonth(anime.startDate.month)} ${anime.startDate.year} ${
-          anime.endDate &&
-          `- ${intToMonth(anime.endDate.month)} ${anime.endDate.year}`
+        value: `${intToMonth(anime.startDate.month)} ${anime.startDate.year}${
+          anime.endDate
+            ? ` - ${intToMonth(anime.endDate.month)} ${anime.endDate.year}`
+            : ""
         }`,
       },
       { name: "🏷️ Genres", value: genres ?? "Not specified" },

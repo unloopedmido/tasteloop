@@ -7,7 +7,7 @@ import { join } from "path";
 export async function loadEvents(client: ExtendedClient): Promise<void> {
   const eventsPath = join(__dirname, "..", "events");
   const eventFiles = readdirSync(eventsPath).filter(
-    (file) => file.endsWith(".ts") ?? file.endsWith(".js")
+    (file) => file.endsWith(".ts") || file.endsWith(".js")
   );
 
   for (const file of eventFiles) {

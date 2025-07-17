@@ -8,7 +8,7 @@ import { join } from "path";
 export async function loadCommands(client: ExtendedClient): Promise<void> {
   const commandsPath = join(__dirname, "..", "commands");
   const commandFiles = readdirSync(commandsPath).filter(
-    (file) => file.endsWith(".ts") ?? file.endsWith(".js")
+    (file) => file.endsWith(".ts") || file.endsWith(".js")
   );
 
   for (const file of commandFiles) {

@@ -43,7 +43,6 @@ export async function handleCallback(req: Request, res: Response) {
   }
 
   const decodedToken = decode(access_token) as JwtPayload;
-  console.log(decodedToken);
 
   await prisma.user.upsert({
     where: {
@@ -64,7 +63,6 @@ export async function handleCallback(req: Request, res: Response) {
   res.send(
     "Successfully authenticated with Anilist. You can close this window."
   );
-  res.end();
 }
 
 export async function authenticatedQuery(

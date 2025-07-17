@@ -19,6 +19,5 @@ export default class RegisterCommand extends BaseCommand {
       )}`,
       flags: ["Ephemeral"],
     });
-    return;
   }
 }

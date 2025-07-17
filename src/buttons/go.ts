@@ -4,8 +4,6 @@ import { updateAnimeButtons } from "@/lib/anime/buttons";
 import { detailsEmbed } from "@/lib/anime/embed";
 import { BaseButton } from "@/structures/button";
 import { fetchContext } from "@/stores/redis";
-import { fetcher } from "@/lib/anime/fetch";
-import { log } from "@/utils/logger";
 
 export default class GoButton extends BaseButton {
   public customId = "go";

@@ -26,16 +26,12 @@ export async function createAnimeButtons(
   let ctxKey = existingCtxKey;
 
   if (ctxKey) {
-    // Try to update existing context
-    const updated = await updateContext(ctxKey, data, 300); // 5 minutes TTL
-
+    const updated = await updateContext(ctxKey, data, 300);
     if (!updated) {
-      // Context expired, create new one
       ctxKey = randomUUID();
       await storeContext(data, 300, ctxKey);
     }
   } else {
-    // Create new context
     ctxKey = randomUUID();
     await storeContext(data, 300, ctxKey);
   }
@@ -53,11 +49,10 @@ export async function createAnimeButtons(
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(page === total - 1)
     ),
-    ctxKey, // Return the context key for reuse
+    ctxKey,
   };
 }
 
-// Optimized version for button navigation (when you already have the context key)
 export async function updateAnimeButtons(
   page: number,
   total: number,
@@ -71,7 +66,6 @@ export async function updateAnimeButtons(
     lastUpdated: Date.now(),
   };
 
-  // Just update the existing context with new page
   await updateContext(ctxKey, data, 300);
 
   return new ActionRowBuilder<ButtonBuilder>().addComponents(

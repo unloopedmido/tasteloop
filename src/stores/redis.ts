@@ -15,16 +15,8 @@ export async function storeContext<T>(
 }
 
 export async function fetchContext<T>(ctxKey: string): Promise<T | null> {
-  try {
-    const raw = await redis.get(ctxKey);
-    if (!raw) {
-      return null;
-    }
-    return JSON.parse(raw) as T;
-  } catch (error) {
-    console.error(`Error fetching context for key ${ctxKey}:`, error);
-    return null;
-  }
+  const raw = await redis.get(ctxKey);
+  return raw ? JSON.parse(raw) as T : null;
 }
 
 export async function updateContext<T>(
