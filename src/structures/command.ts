@@ -19,7 +19,7 @@ export abstract class BaseCommand {
     log.error("Command error:", error);
     await followUpOrReply(interaction, {
       content: "An error occurred while executing this command.",
-      ephemeral: true,
+      flags: ["Ephemeral"],
     });
   }
 }

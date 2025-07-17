@@ -21,8 +21,12 @@
 
     // Some stricter flags (disabled by default)
     "noUnusedLocals": false,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
+
+    // Import paths
     "baseUrl": "./src",
     "paths": {
       "@/*": ["*"]

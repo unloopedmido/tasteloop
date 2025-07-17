@@ -62,18 +62,21 @@ const queryBody = `
         }
 `;
 
-export function getGQLQuery(action: "search" | "fetch") {
-  const variable = action === "search" ? "$query: String" : "$id: Int";
-  const mediaType = action === "search" ? "search: $query" : "id: $id";
-
-  return gql`
-    query (${variable}) {
-      Media(${mediaType}, type: ANIME) {
+export const searchQuery = gql`
+  query ($query: String) {
+      Media(search: $query, type: ANIME) {
         ${queryBody}
       }
+  }
+`;
+
+export const fetchQuery = gql`
+  query ($id: Int) {
+    Media(id: $id, type: ANIME) {
+      ${queryBody}
     }
-  `;
-}
+  }
+`;
 
 export const topQuery = gql`
   query {

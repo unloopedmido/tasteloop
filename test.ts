@@ -1,14 +1,15 @@
-import {
-  fetchAnime,
-  fetchAnimeList,
-  fetcher,
-  fetchTopAnime,
-  searchAnime,
-} from "@/lib/anime/fetch";
+import { authenticatedQuery } from "@/lib/auth";
 
-console.log(
-  await fetcher({ type: "search", query: "Naruto", userId: "12345" })
-);
-// console.log(await searchAnime("Naruto"));
-// console.log(await fetchAnimeList("nonlooped", "ANIME"));
-// console.log(await fetchTopAnime());
+const GET_LIST = `
+  query ($status: MediaListStatus) {
+    MediaListCollection(status: $status, type: ANIME) {
+      lists {
+        name
+        entries { media { title { romaji } } }
+      }
+    }
+  }
+`;
+
+const data = await authenticatedQuery("1129806570256089149", GET_LIST);
+console.log(data);

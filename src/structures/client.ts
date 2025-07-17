@@ -7,7 +7,8 @@ import { loadButtons } from "@/handlers/buttons";
 import { startDevWatcher } from "@/dev/watcher";
 import { loadEvents } from "@/handlers/events";
 import { loadModals } from "@/handlers/modals";
-// import { PrismaClient } from "@/stores/prisma";
+import { prisma } from "@/lib/db";
+import { startServer } from "@/server";
 
 declare global {
   var botStarted: boolean | undefined;
@@ -22,7 +23,7 @@ export class ExtendedClient extends Client {
     { messageId: string; timeout: NodeJS.Timeout }
   > = new Map();
   public theme: number = Colors.Purple;
-  // public db: PrismaClient = new PrismaClient();
+  public db = prisma;
 
   constructor() {
     super({
@@ -47,6 +48,7 @@ export class ExtendedClient extends Client {
     Bun.env.NODE_ENV === "development" && startDevWatcher(this);
     Bun.env.NODE_ENV === "production" && (await registerCommands(this));
     await loadEvents(this);
+    await startServer();
     await this.login(Bun.env.DISCORD_BOT_TOKEN);
   }
 }

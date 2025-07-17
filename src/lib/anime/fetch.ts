@@ -1,15 +1,13 @@
 import type { Anime, ListAnime } from "@/types/anime.new";
 import { GraphQLClient } from "graphql-request";
-import { getGQLQuery, listQuery, topQuery } from "./queries";
-import type { AnimeContext } from "@/types/anime.new";
+import { fetchQuery, listQuery, searchQuery, topQuery } from "./queries";
 
 const client = new GraphQLClient("https://graphql.anilist.co");
 
 export async function fetchAnime(id: number) {
-  const query = getGQLQuery("fetch");
   const variables = { id: id };
 
-  const res = (await client.request(query, variables)) as {
+  const res = (await client.request(fetchQuery, variables)) as {
     Media: Anime;
   };
 
@@ -17,7 +15,6 @@ export async function fetchAnime(id: number) {
 }
 
 export async function searchAnime(query: string) {
-  const searchQuery = getGQLQuery("search");
   const variables = { query: query };
 
   const res = (await client.request(searchQuery, variables)) as {
