@@ -14,7 +14,7 @@ export async function createAnimeButtons(
   page: number,
   total: number,
   context: AnimeContext,
-  existingCtxKey?: string
+  existingCtxKey?: string,
 ) {
   const data: StoredAnimeData = {
     page,
@@ -47,7 +47,7 @@ export async function createAnimeButtons(
         .setCustomId(`go:${ctxKey}:next`)
         .setLabel("▶️")
         .setStyle(ButtonStyle.Secondary)
-        .setDisabled(page === total - 1)
+        .setDisabled(page === total - 1),
     ),
     ctxKey,
   };
@@ -57,7 +57,7 @@ export async function updateAnimeButtons(
   page: number,
   total: number,
   context: AnimeContext,
-  ctxKey: string
+  ctxKey: string,
 ) {
   const data: StoredAnimeData = {
     page,
@@ -78,6 +78,6 @@ export async function updateAnimeButtons(
       .setCustomId(`go:${ctxKey}:next`)
       .setLabel("▶️")
       .setStyle(ButtonStyle.Secondary)
-      .setDisabled(page === total - 1)
+      .setDisabled(page === total - 1),
   );
 }

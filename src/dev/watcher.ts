@@ -22,7 +22,7 @@ function debounce(fn: () => Promise<void>) {
 async function reloadHandler(
   client: ExtendedClient,
   handlerName: string,
-  loader: (client: ExtendedClient) => Promise<void>
+  loader: (client: ExtendedClient) => Promise<void>,
 ) {
   try {
     log.info(`Reloading ${handlerName}...`);

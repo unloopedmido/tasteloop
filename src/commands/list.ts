@@ -17,7 +17,7 @@ export default class ListNewCommand extends BaseCommand {
         .setDescription("Minimum score to filter animes")
         .setRequired(false)
         .setMinValue(0)
-        .setMaxValue(10)
+        .setMaxValue(10),
     )
     .addIntegerOption((opt) =>
       opt
@@ -25,7 +25,7 @@ export default class ListNewCommand extends BaseCommand {
         .setDescription("Maximum score to filter animes")
         .setRequired(false)
         .setMinValue(0)
-        .setMaxValue(10)
+        .setMaxValue(10),
     );
 
   public async execute({ interaction, userData }: CommandParams) {
@@ -52,12 +52,12 @@ export default class ListNewCommand extends BaseCommand {
       .map((anime) => {
         const statusEmoji = getStatusEmoji(
           anime.progress ?? 0,
-          anime.media.episodes ?? 0
+          anime.media.episodes ?? 0,
         );
         const progressBar = makeProgressBar(
           anime.progress ?? 0,
           anime.media.episodes ?? 0,
-          8
+          8,
         );
 
         return {

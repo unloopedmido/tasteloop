@@ -10,7 +10,7 @@ export default class SearchCommand extends BaseCommand {
     .setName("search")
     .setDescription("Search for an anime")
     .addStringOption((opt) =>
-      opt.setName("query").setDescription("Search query").setRequired(true)
+      opt.setName("query").setDescription("Search query").setRequired(true),
     );
 
   public async execute({ interaction }: CommandParams) {

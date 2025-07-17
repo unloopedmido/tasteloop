@@ -68,7 +68,7 @@ export default class InteractionCreateEvent extends BaseClientEvent<"interaction
       } catch (error) {
         log.error(
           `Error executing button handler ${interaction.customId}:`,
-          error
+          error,
         );
         if (!interaction.replied && !interaction.deferred) {
           await followUpOrReply(interaction, {
@@ -90,7 +90,7 @@ export default class InteractionCreateEvent extends BaseClientEvent<"interaction
       } catch (error) {
         log.error(
           `Error executing modal handler ${interaction.customId}:`,
-          error
+          error,
         );
         if (!interaction.replied && !interaction.deferred) {
           await followUpOrReply(interaction, {
@@ -104,7 +104,7 @@ export default class InteractionCreateEvent extends BaseClientEvent<"interaction
 
   private async scheduleButtonsForRemoval(
     client: ExtendedClient,
-    interaction: any
+    interaction: any,
   ) {
     if (!interaction.replied && !interaction.deferred) return;
 
@@ -118,7 +118,7 @@ export default class InteractionCreateEvent extends BaseClientEvent<"interaction
                 client,
                 response.id,
                 interaction.channelId!,
-                component.customId
+                component.customId,
               );
             }
           });

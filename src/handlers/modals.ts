@@ -7,7 +7,7 @@ import { join } from "path";
 export async function loadModals(client: ExtendedClient): Promise<void> {
   const modalsPath = join(__dirname, "..", "modals");
   const modalFiles = readdirSync(modalsPath).filter(
-    (f) => f.endsWith(".ts") || f.endsWith(".js")
+    (f) => f.endsWith(".ts") || f.endsWith(".js"),
   );
 
   for (const file of modalFiles) {

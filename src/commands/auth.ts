@@ -44,7 +44,7 @@ export default class AuthCommand extends BaseCommand {
           new ButtonBuilder()
             .setLabel("Authenticate")
             .setStyle(ButtonStyle.Link)
-            .setURL(url)
+            .setURL(url),
         ),
       ],
       flags: ["Ephemeral"],

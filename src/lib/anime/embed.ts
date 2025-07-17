@@ -7,16 +7,17 @@ function listDetailsEmbed(rawAnime: ListAnime) {
   const anime = processListAnimes([rawAnime])[0];
   const genres = anime.media.genres?.join(", ");
   const studios = anime.media.studios!.nodes!.map((s) => s.name).join(", ");
-  const synopsis = anime.media.description!.split("\n")[0].slice(0, 150) + "...";
+  const synopsis =
+    anime.media.description!.split("\n")[0].slice(0, 150) + "...";
   const progressBar = makeProgressBar(
     anime.progress,
     anime.media.episodes ?? 1,
-    8
+    8,
   );
 
   return baseEmbed({
     color: parseInt(
-      anime.media.coverImage.color?.replace("#", "0x") ?? "0x000000"
+      anime.media.coverImage.color?.replace("#", "0x") ?? "0x000000",
     ),
     title: anime.media.title.userPreferred,
     url: anime.media.siteUrl,

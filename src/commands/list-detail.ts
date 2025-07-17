@@ -13,7 +13,7 @@ export default class ListDetailCommand extends BaseCommand {
       opt
         .setName("search")
         .setRequired(false)
-        .setDescription("Search for a specific anime in your list")
+        .setDescription("Search for a specific anime in your list"),
     );
 
   public async execute({ interaction, userData }: CommandParams) {
@@ -21,7 +21,7 @@ export default class ListDetailCommand extends BaseCommand {
 
     const searchQuery = interaction.options.getString("search") ?? "";
     const animes = (await fetcher("list", userData!.anilistId)).sort(
-      (a, b) => b.score - a.score
+      (a, b) => b.score - a.score,
     );
     const context = {
       userId: interaction.user.id,
@@ -31,7 +31,7 @@ export default class ListDetailCommand extends BaseCommand {
     const searchedAnimes = animes.filter((a) =>
       a.media.title
         .userPreferred!.toLowerCase()
-        .includes(searchQuery?.toLowerCase() ?? "")
+        .includes(searchQuery?.toLowerCase() ?? ""),
     );
 
     if (searchQuery && searchedAnimes.length > 0) {

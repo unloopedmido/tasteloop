@@ -9,20 +9,20 @@ export const redis = new Redis({
 export async function storeContext<T>(
   payload: T,
   ttlSeconds = 60,
-  ctxKey: string
+  ctxKey: string,
 ): Promise<void> {
   await redis.set(ctxKey, JSON.stringify(payload), "EX", ttlSeconds);
 }
 
 export async function fetchContext<T>(ctxKey: string): Promise<T | null> {
   const raw = await redis.get(ctxKey);
-  return raw ? JSON.parse(raw) as T : null;
+  return raw ? (JSON.parse(raw) as T) : null;
 }
 
 export async function updateContext<T>(
   ctxKey: string,
   payload: T,
-  ttlSeconds = 60
+  ttlSeconds = 60,
 ): Promise<boolean> {
   const exists = await redis.exists(ctxKey);
   if (!exists) return false;

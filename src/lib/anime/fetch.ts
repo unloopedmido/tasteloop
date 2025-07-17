@@ -21,7 +21,7 @@ export async function fetchAnimeList(userId: number, type: "ANIME" | "MANGA") {
     };
   };
 
-  return res.MediaListCollection.lists.flatMap(list => list.entries);
+  return res.MediaListCollection.lists.flatMap((list) => list.entries);
 }
 
 export async function fetchTopAnime() {
@@ -35,16 +35,16 @@ export async function fetchTopAnime() {
 
 export async function fetcher(
   method: "search",
-  param: string
+  param: string,
 ): Promise<Anime[]>;
 export async function fetcher(
   method: "list",
-  param: number
+  param: number,
 ): Promise<ListAnime[]>;
 export async function fetcher(method: "top"): Promise<Anime[]>;
 export async function fetcher(
   method: string,
-  param?: string | number
+  param?: string | number,
 ): Promise<Anime[] | ListAnime[]> {
   switch (method) {
     case "search":

@@ -15,7 +15,7 @@ export function followUpOrReply(
     | ChatInputCommandInteraction
     | ButtonInteraction
     | ModalSubmitInteraction,
-  options: string | MessagePayload | InteractionReplyOptions
+  options: string | MessagePayload | InteractionReplyOptions,
 ) {
   if (interaction.deferred || interaction.replied) {
     return interaction.followUp(options);

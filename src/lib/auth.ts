@@ -61,14 +61,14 @@ export async function handleCallback(req: Request, res: Response) {
   });
 
   res.send(
-    "Successfully authenticated with Anilist. You can close this window."
+    "Successfully authenticated with Anilist. You can close this window.",
   );
 }
 
 export async function authenticatedQuery(
   discordID: string,
   query: string,
-  vars: Record<string, unknown> = {}
+  vars: Record<string, unknown> = {},
 ) {
   const user = await prisma.user.findUnique({ where: { id: discordID } });
 

@@ -7,7 +7,7 @@ import { join } from "path";
 export async function loadButtons(client: ExtendedClient): Promise<void> {
   const buttonsPath = join(__dirname, "..", "buttons");
   const buttonFiles = readdirSync(buttonsPath).filter(
-    (f) => f.endsWith(".ts") || f.endsWith(".js")
+    (f) => f.endsWith(".ts") || f.endsWith(".js"),
   );
 
   for (const file of buttonFiles) {
@@ -29,7 +29,7 @@ export function scheduleButtonRemoval(
   messageId: string,
   channelId: string,
   customId: string,
-  timeoutMs: number = 60_000 // Default to 60 seconds
+  timeoutMs: number = 60_000, // Default to 60 seconds
 ): void {
   const existing = client.activeButtons.get(customId);
   if (existing) {
@@ -60,7 +60,7 @@ export function scheduleButtonRemoval(
 
 export function cancelButtonRemoval(
   client: ExtendedClient,
-  customId: string
+  customId: string,
 ): void {
   const existing = client.activeButtons.get(customId);
   if (existing) {

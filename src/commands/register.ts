@@ -15,7 +15,7 @@ export default class RegisterCommand extends BaseCommand {
 
     await interaction.reply({
       content: `Commands have been registered successfully!\n${commandNames.join(
-        "\n"
+        "\n",
       )}`,
       flags: ["Ephemeral"],
     });

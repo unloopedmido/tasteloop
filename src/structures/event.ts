@@ -2,7 +2,7 @@ import type { ClientEvents } from "discord.js";
 import type { ExtendedClient } from "./client";
 
 export abstract class BaseClientEvent<
-  T extends keyof ClientEvents = keyof ClientEvents
+  T extends keyof ClientEvents = keyof ClientEvents,
 > {
   public abstract data: {
     name: T;
