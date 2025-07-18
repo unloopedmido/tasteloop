@@ -14,7 +14,7 @@ function createButtons(
   ctxKey: string,
   page: number,
   total: number,
-  saved: boolean = false
+  saved: boolean = false,
 ) {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
@@ -31,7 +31,7 @@ function createButtons(
       .setCustomId(`go:${ctxKey}:next`)
       .setEmoji("▶️")
       .setStyle(ButtonStyle.Secondary)
-      .setDisabled(page === total - 1)
+      .setDisabled(page === total - 1),
   );
 }
 
@@ -39,7 +39,7 @@ export async function createAnimeButtons(
   page: number,
   total: number,
   context: AnimeContext,
-  existingCtxKey?: string
+  existingCtxKey?: string,
 ) {
   const data: StoredAnimeData = {
     page,
@@ -74,7 +74,7 @@ export async function updateAnimeButtons(
   page: number,
   total: number,
   context: AnimeContext,
-  ctxKey: string
+  ctxKey: string,
 ) {
   const data: StoredAnimeData = {
     page,

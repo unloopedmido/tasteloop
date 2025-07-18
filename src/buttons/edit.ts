@@ -63,14 +63,14 @@ export default class EditButton extends BaseButton {
         new ActionRowBuilder<TextInputBuilder>().addComponents(
           new TextInputBuilder()
             .setPlaceholder(
-              "Enter the number of episodes watched (all if completed)"
+              "Enter the number of episodes watched (all if completed)",
             )
             .setValue(savedAnime?.progress.toString() || "0")
             .setStyle(TextInputStyle.Short)
             .setLabel("Episodes Watched")
             .setCustomId("progress")
             .setRequired(true)
-            .setMaxLength(10)
+            .setMaxLength(10),
         ),
         new ActionRowBuilder<TextInputBuilder>().addComponents(
           new TextInputBuilder()
@@ -80,8 +80,8 @@ export default class EditButton extends BaseButton {
             .setLabel("Score")
             .setCustomId("score")
             .setRequired(true)
-            .setMaxLength(3)
-        )
+            .setMaxLength(3),
+        ),
       );
 
     await interaction.showModal(editModal);

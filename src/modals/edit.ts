@@ -70,10 +70,10 @@ export default class EditModal extends BaseModal {
       progress === anime.episodes
         ? "COMPLETED"
         : progress === 0
-        ? "PLANNING"
-        : "CURRENT";
+          ? "PLANNING"
+          : "CURRENT";
 
-    let json: any;
+    let json: { data: Record<string, unknown>; errors?: unknown[] };
     try {
       const res = await fetch("https://graphql.anilist.co", {
         method: "POST",
