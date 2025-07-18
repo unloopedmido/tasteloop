@@ -63,10 +63,12 @@ const queryBody = `
 `;
 
 export const searchQuery = gql`
-  query ($query: String) {
-      Media(search: $query, type: ANIME) {
+  query ($query: String, $page: Int = 1, $perPage: Int = 10) {
+    Page(page: $page, perPage: $perPage) {
+      media(search: $query, type: ANIME) {
         ${queryBody}
       }
+    }
   }
 `;
 
