@@ -49,7 +49,7 @@ Environment variables:
 - `/` — Landing page. If `q` is present, shows search results; otherwise shows hero + curated sections.
 	- Search: `/?q=naruto`
 - `/anime/:id` — Anime detail page with parsed theme list (openings/endings).
-- `/anime/:id/opening/:opnum?` — Attempts to find an opening by sequence and fetch a playable video link from AnimeThemes.
+- `/anime/:id/:type/:num?` — Attempts to find a theme by sequence and fetch a playable video link from AnimeThemes.
 
 ## Notes & limitations
 - Learning project; built quickly and likely won’t receive updates.
