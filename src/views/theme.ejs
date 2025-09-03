@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('partials/head', { pageTitle: `TasteLoop - ${type} • ${theme.title}` }) %>
+
+<body class="min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-black text-white">
+  <%- include('partials/header') %>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <nav class="text-sm text-white/70 mb-4">
+      <a class="hover:text-white" href="/anime/<%= anime.mal_id %>"><%= anime.title %></a>
+      <span class="mx-2">/</span>
+      <span><%= type %> <%= theme.prefix ?? '' %></span>
+    </nav>
+
+    <header class="mb-6">
+      <h1 class="text-2xl sm:text-3xl font-semibold"><%= theme.title %></h1>
+      <div class="flex gap-1 my-5">
+        <a rel="noopener noreferrer" target="_blank" class="py-1 px-2 border border-white/10 bg-white/5 rounded-md" href="https://www.youtube.com/results?search_query=<%= theme.title %> by <%= theme.artist %>&sp=CAMSAhAB"><i class="fa-brands text-red-500 fa-youtube"></i></a>
+        <a rel="noopener noreferrer" target="_blank" class="py-1 px-2 border border-white/10 bg-white/5 rounded-md" href="https://open.spotify.com/search/<%= theme.title %> by <%= theme.artist %>"><i class="fa-brands text-green-500 fa-spotify"></i></a>
+      </div>
+      <% if (theme.title_japanese) { %>
+      <p class="text-white/70"><%= theme.title_japanese %></p>
+      <% } %>
+      <p class="mt-1 text-white/70">by <%= theme.artist %></p>
+    </header>
+
+    <% if (typeof link !== 'undefined' && link) { %>
+    <div class="aspect-video w-full max-w-3xl rounded-xl overflow-hidden bg-black/40 border border-white/10">
+      <video class="w-full h-full" controls playsinline>
+        <source src="<%= link %>" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+    <% } else { %>
+    <div class="p-6 rounded-xl bg-white/5 border border-white/10 max-w-3xl">
+      <p class="text-white/80">Video link not available. Try another sequence if present.</p>
+    </div>
+    <% } %>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+
+</html>

@@ -1,0 +1,20 @@
+<header class="sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-black/40 bg-black/30 border-b border-white/10">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex h-14 items-center justify-between gap-3">
+      <a href="/" class="flex items-baseline gap-2 shrink-0">
+        <span class="text-2xl font-extrabold text-yellow-500">Taste</span>
+        <span class="text-2xl font-light text-white">Loop</span>
+      </a>
+      <form action="/" method="get" class="flex-1 hidden md:flex items-center gap-2">
+        <input
+          type="search"
+          name="q"
+          value="<%= typeof q !== 'undefined' ? q : '' %>"
+          placeholder="Search titles, JP names, or genres..."
+          class="w-full px-3 py-1.5 rounded-md bg-white/5 border border-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+        />
+        <button class="px-3 py-1.5 rounded-md bg-yellow-500 text-black font-medium hover:bg-yellow-400" type="submit">Search</button>
+      </form>
+    </div>
+  </div>
+</header>

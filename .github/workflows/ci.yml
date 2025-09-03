@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install deps
+        run: bun install
+
+      - name: Type check
+        run: bun run typecheck
+
+      - name: Smoke run (no dataset)
+        run: |
+          echo "[]" > tmp.dataset.json
+          DATASET_PATH=tmp.dataset.json bun run src/index.ts &
+          sleep 2
+          curl -sSf http://localhost:3000 | head -c 200
+        shell: bash

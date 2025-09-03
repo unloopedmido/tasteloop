@@ -1,0 +1,40 @@
+{
+  "name": "tasteloop",
+  "version": "0.1.0",
+  "description": "TasteLoop - Anime Openings/Endings Browser (Express + EJS, Bun)",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.21",
+    "@types/express": "^5.0.3",
+    "typescript": "^5.6.2"
+  },
+  "peerDependencies": {},
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "p-map": "^7.0.3"
+  },
+  "trustedDependencies": [
+    "@tailwindcss/oxide",
+    "es5-ext",
+    "youtube-dl-exec"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unloopedmido/tasteloop.git"
+  },
+  "bugs": {
+    "url": "https://github.com/unloopedmido/tasteloop/issues"
+  },
+  "homepage": "https://github.com/unloopedmido/tasteloop#readme",
+  "license": "MIT",
+  "engines": {
+    "bun": ">=1.1.0"
+  }
+}
