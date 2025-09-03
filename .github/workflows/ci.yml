@@ -27,7 +27,13 @@ jobs:
       - name: Smoke run (no dataset)
         run: |
           echo "[]" > tmp.dataset.json
-          DATASET_PATH=tmp.dataset.json bun run src/index.ts &
-          sleep 2
-          curl -sSf http://localhost:3000 | head -c 200
+          DATASET_PATH=tmp.dataset.json bun run src/index.ts > server.log 2>&1 &
+          for i in {1..20}; do
+            if curl -sSf http://localhost:3000 -o /dev/null; then
+              echo "server ready"
+              break
+            fi
+            sleep 1
+          done
+          curl -sSf http://localhost:3000 | head -c 200 || (echo "server failed to start — logs:" && cat server.log && exit 1)
         shell: bash
